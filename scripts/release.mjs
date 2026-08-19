@@ -62,10 +62,6 @@ if (git('status', '--porcelain') !== '') {
 // 2. Bump the version and stamp the changelog.
 const packagePath = resolve(root, 'package.json')
 const pkg = JSON.parse(readFileSync(packagePath, 'utf8'))
-if (pkg.version === version) {
-  console.error(`package.json already at ${version}; nothing to do`)
-  process.exit(1)
-}
 pkg.version = version
 writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`)
 
@@ -82,6 +78,13 @@ writeFileSync(versionSourcePath, versionSource)
 const changelogPath = resolve(root, 'CHANGELOG.md')
 let changelog = readFileSync(changelogPath, 'utf8')
 const unreleased = '## [Unreleased]'
+// A first release keeps the scaffold version (already equal to <version>) but
+// still needs the CHANGELOG stamp and the tag; only a stamped changelog means
+// there is nothing left to do.
+if (pkg.version === version && !changelog.includes(unreleased)) {
+  console.error(`package.json already at ${version} and CHANGELOG already stamped; nothing to do`)
+  process.exit(1)
+}
 if (!changelog.includes(unreleased)) {
   console.error(`CHANGELOG.md has no ${unreleased} section; add one with the release entries first`)
   process.exit(1)
