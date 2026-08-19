@@ -6,3 +6,5 @@ coverage/
 *.log
 .DS_Store
 .tmp/
+
+fixtures/cleaned-fund-holdings.csv
