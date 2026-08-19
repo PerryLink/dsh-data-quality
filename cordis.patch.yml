@@ -1,0 +1,46 @@
+# dsh-data-quality bundle patch: deterministic data profiling, cleaning, and
+# verification (ctx.dataQuality + data_profile / data_clean / data_verify).
+#
+# Every key below is a Config field (Schemastery schema); invalid values fail
+# the profile load loudly. See README.md "Configuration" for the full table.
+# The storage stack rows mirror dsh-fast: the plugin injects `storageDomain`,
+# so a bare profile needs the hub + a JSON backend + the domain form mounted.
+- insert:
+    - id: storage
+      name: '@deepseek-ai/dsh-storage'
+
+    - id: storage-json
+      name: '@deepseek-ai/dsh-storage-json'
+      config:
+        root: !!js dshHomePath('storages')
+
+    - id: storage-domain
+      name: '@deepseek-ai/dsh-storage-domain'
+      config:
+        backend: json
+
+    - id: dsh-data-quality
+      name: dsh-data-quality
+      config:
+        # Master switch. On by default; `false` mounts nothing at all.
+        enabled: true
+        # Hard row cap per dataset load; larger inputs are rejected loudly
+        # (use the tool's `sample` parameter to profile a subset).
+        maxRows: 200000
+        # Hard file-size cap in MiB per dataset load.
+        maxFileSizeMB: 64
+        # Default relative tolerance for numeric citation comparison when a
+        # citation omits `tolerance`.
+        defaultTolerance: 0.000000001
+        # Max evidence rows (verify failures) and preview rows (clean output)
+        # carried in one tool result.
+        evidenceRowLimit: 20
+        # Extensions the tools and the service accept as datasets.
+        allowedExtensions: ['.csv', '.tsv', '.json', '.jsonl']
+        # Absolute root for SERVICE-level calls (ctx.dataQuality.*) that carry
+        # no session workspace. Tool calls always use the session's workspace
+        # cwd instead. Empty = the harness process launch directory.
+        workspaceRoot: ''
+        # Persist profile/clean/verify reports to the `data_quality` storage
+        # domain (durable, queryable). Keys are returned as `reportKey`.
+        storeReports: true
