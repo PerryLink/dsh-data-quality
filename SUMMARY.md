@@ -137,9 +137,11 @@ d6af7b6 chore: project scaffold (package manifest, tsconfig trio, build/test con
 
 Add one row to the Project/Plugins overview roster: `dsh-data-quality` — `ctx.dataQuality` three-layer seam (deterministic profiling/cleaning/verification) with `data_profile` / `data_clean` / `data_verify` tools; v0.1.0 on npm since 2026-08-19.
 
-## Release-session handoff (PHASE2 §0.3 chain, executed by the release session — not here)
+## Release-session handoff (PHASE2 §0.3 chain) — execution status
 
-1. **Community feedback check** — GitHub Release v0.1.0 exists on `PerryLink/dsh-data-quality`; review issues/discussions before the next release.
-2. **Standard item B (community engineering)** — set the GitHub topics `dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification` (mirror `package.json` keywords); five-language READMEs are already in sync (enforced by `verify:readme-sync`), `THIRD_PARTY_NOTICES.md` is current.
-3. **Standard item A (ecosystem delivery)** — npm is already published (`dsh-data-quality@0.1.0`); optionally submit a catalog entry (awesome-dsh-plugins etc.) if the chain requires it.
-4. **Standard item C (publish upload)** — closed for 0.1.0 (tag `v0.1.0`, GitHub Release, npm publish). For the next version: `node scripts/release.mjs <x.y.z>` (stamps CHANGELOG, re-runs the gate, commits + tags, never pushes), then push — `release.yml` publishes to npm with provenance and creates the GitHub Release from the stamped CHANGELOG section (needs the `NPM_TOKEN` secret configured on the repo).
+The chain was executed (2026-08-20) as far as the session's capabilities allow:
+
+1. **Community feedback check** — DONE: GitHub API audit shows `PerryLink/dsh-data-quality` has 0 open/0 closed issues, 0 stars; no feedback to fold in before the next release.
+2. **Standard item B (community engineering)** — DONE: all 8 GitHub topics are set (`dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification` — mirror of `package.json` keywords); five-language READMEs pass `verify:readme-sync`; `THIRD_PARTY_NOTICES.md` current. The Project/Plugins overview (`D:\deepseek-harness\Project\Plugins\README.md`) now lists `dsh-data-quality` under "已发布 GitHub + npm" (30 projects / 13 published).
+3. **Standard item A (ecosystem delivery)** — npm closed (`dsh-data-quality@0.1.0`, 2026-08-19T13:54Z). Ecosystem catalog submission is BLOCKED: community catalogs exist (`awesome-dsh-plugins/awesome-dsh-plugins` et al., none listing this plugin yet) but submitting requires GitHub write credentials — no `gh` CLI and no `GH_TOKEN`/`GITHUB_TOKEN` in this session; a release session with credentials should open the catalog PR.
+4. **Standard item C (publish upload)** — CLOSED for 0.1.0: tag `v0.1.0`, GitHub Release (2026-08-19T13:45Z), npm publish (2026-08-19T13:54Z). `main` synced to origin (`d669a19`). For the next version: `node scripts/release.mjs <x.y.z>` (stamps CHANGELOG, re-runs the gate, commits + tags, never pushes), then push — `release.yml` publishes to npm with provenance and creates the GitHub Release from the stamped CHANGELOG section (needs the `NPM_TOKEN` secret configured on the repo).
