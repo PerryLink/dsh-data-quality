@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "annualReturn": 0.1234,
+    "fundCount": 8,
+    "asOf": "2026-08-15"
+  },
+  "rows": [
+    { "fund_code": "FUND001", "nav": 1.234 },
+    { "fund_code": "FUND002", "nav": 0.987 },
+    { "fund_code": "FUND003", "nav": 2.5 },
+    { "fund_code": "FUND004", "nav": "not-a-number" }
+  ]
+}

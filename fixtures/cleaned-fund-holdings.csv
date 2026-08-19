@@ -1,0 +1,9 @@
+fund_code,fund_name,nav,nav_date,holding_value,currency
+FUND001,Alpha Growth,1.234,2026-08-01,50000000,CNY
+FUND002,Beta Income,0.987,2026/08/02,120000000,CNY
+FUND003,Gamma Tech,,2026-08-03,250000000,CNY
+FUND004,Delta Value,2.3456,not-a-date,8000,HKD
+FUND005,Epsilon Bond,0.556,2026-08-05,,CNY
+FUND006,Zeta Mixed,abc,2026-08-06,15000000,CNY
+FUND007,Eta Quant,88.5,2026-08-07,999000000,CNY
+FUND008,Theta Stable,1.001,2026-08-08,30000000,cny
