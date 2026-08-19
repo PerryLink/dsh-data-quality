@@ -1,0 +1,181 @@
+# dsh-data-quality
+
+**Perfilamento, limpeza e verificação de dados determinísticos para DeepSeek Harness.**
+
+Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz as contas. Uma costura de capacidade `ctx.dataQuality` (Service Definition / Provider local / Consumers de ferramentas) expõe três ferramentas para o modelo mais um contrato congelado de verificação de citações entre plugins.
+
+[English](README.md) · [简体中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+
+## Compatibility
+
+| Componente | Versão |
+|---|---|
+| DeepSeek Harness | `0.1.0-rc.6` (dependências peer fixadas) |
+| Node.js | `^22.19.0 \|\| >=24.0.0` |
+| Gerenciador de pacotes | `pnpm@11.7.0` |
+| Plataforma | Windows / macOS / Linux (plugin apenas de host) |
+
+## What you get
+
+- **Serviço `ctx.dataQuality`** — um serviço Cordis que outros plugins podem consumir opcionalmente (`inject = ['dataQuality']`). Além das três operações sobre datasets por trás das ferramentas, implementa o contrato congelado `verifyCitations(request)`: verifica se números/strings citados num documento batem com um instantâneo do dataset, com comparação numérica por tolerância relativa e estados `verified` / `mismatch` / `not-found` / `unverifiable`.
+- **Ferramenta `data_profile`** — perfilamento de datasets: contagens de linhas/colunas, tipos de coluna inferidos (number/date/boolean/string/empty/mixed), taxas de ausência, contagens de valores únicos, distribuições numéricas (min/max/mean/median/p25/p75), contagem de outliers IQR, notas de suspeita de tipos mistos e contagem de linhas duplicadas da tabela inteira. Amostragem sistemática determinística opcional para arquivos grandes.
+- **Ferramenta `data_clean`** — regras declarativas de limpeza em ordem: `dedupe` (por grupo de colunas), `fill-missing` (constant/mean/median/forward), `coerce-type` (number/date/boolean; falhas contadas e viram ausentes), `normalize-unit` (p. ex. sufixos 万/亿 para unidades base), `trim`, `map-values` (mapeamento de enumerações). Retorna um log de auditoria por regra mais uma prévia limitada; só grava o dataset limpo quando `outputPath` é dado e nunca sobrescreve a origem.
+- **Ferramenta `data_verify`** — regras declarativas de verificação: `not-null`, `unique`, `range`, `regex`, `enum`, `cross-column` (p. ex. `startDate < endDate`), `freshness` (coluna de data dentro de N dias de uma data de referência). pass/fail por regra com evidência limitada de linhas falhas; uma falha geral é um resultado normal `passed: false`, não um erro de ferramenta.
+- **Relatórios duráveis** — cada execução de perfilamento/limpeza/verificação/citações persiste no domínio de armazenamento `data_quality` (backend JSON), com chave de timestamp mais impressão digital do caminho do dataset; a chave é retornada como `reportKey` nos resultados.
+- **Eventos de sessão** — em hosts que os suportam com segurança, as execuções anexam eventos `data-quality/profile` / `data-quality/clean` / `data-quality/verify` (com a marca `ignorable` onde suportado). Em 0.1.0-rc.6 o append é omitido por design — o relatório do domínio de armazenamento é sempre a cópia durável (ver «Known limitations»).
+
+## Quick start
+
+### Canal npm
+
+```sh
+dsh plugin --profile web add dsh-data-quality
+```
+
+### Canal tarball (não precisa de permissão de build)
+
+```sh
+pnpm pack                                  # produz dsh-data-quality-<version>.tgz
+dsh plugin --profile web add ./dsh-data-quality-<version>.tgz
+```
+
+### Canal git
+
+```sh
+dsh plugin --profile web add github:YOUR_ORG/dsh-data-quality#<commit-sha>
+```
+
+O primeiro `add` falha porque o pnpm bloqueia o build `prepare` do pacote; copie a chave exata que o pnpm imprimiu para o `pnpm-workspace.yaml` do profile e execute de novo:
+
+```yaml
+allowBuilds:
+  'dsh-data-quality': true
+```
+
+Reinicie o profile após instalar (bundles ativam no reinício). Depois peça ao agente, num workspace com um CSV:
+
+> Perfile `holdings.csv`, depois limpe-o aparando espaços, desduplicando por `fund_code` e normalizando as unidades 万/亿 da coluna `holding_value`; por fim verifique que `fund_code` é único e não nulo.
+
+## Install & uninstall
+
+```sh
+dsh plugin --profile web add dsh-data-quality      # instalar (npm) — ou as formas acima
+dsh plugin --profile web remove dsh-data-quality   # desinstalar
+```
+
+## Configuration
+
+Todas as chaves são opcionais (valores padrão mostrados); valores inválidos falham ruidosamente no carregamento. Cada chave pode ser alterada no `cordis.yml` (o bundle inclui `cordis.patch.yml` com os mesmos padrões).
+
+| Key | Default | Description |
+|---|---|---|
+| `enabled` | `true` | Interruptor mestre; `false` não monta nada. |
+| `maxRows` | `200000` | Teto rígido de linhas por carga; entradas maiores são rejeitadas ruidosamente (use o parâmetro `sample` da ferramenta). |
+| `maxFileSizeMB` | `64` | Teto rígido de tamanho de arquivo em MiB por carga. |
+| `defaultTolerance` | `1e-9` | Tolerância relativa padrão para comparação numérica de citações quando a citação omite `tolerance`. |
+| `evidenceRowLimit` | `20` | Teto de linhas de evidência (verify) e de prévia (clean) num resultado. |
+| `allowedExtensions` | `['.csv', '.tsv', '.json', '.jsonl']` | Extensões aceitas como datasets. |
+| `workspaceRoot` | `""` | Raiz absoluta para chamadas de nível de SERVIÇO (p. ex. `verifyCitations`) sem workspace de sessão; vazio = diretório de arranque do processo do harness. Ferramentas sempre usam o cwd do workspace da sessão. |
+| `storeReports` | `true` | Persistir relatórios no domínio de armazenamento `data_quality` e retornar `reportKey`. |
+
+## Tools & surfaces
+
+### `data_profile({ path, sample? })`
+
+Perfilam um dataset do workspace. `path` é relativo ao workspace (`.csv`/`.tsv`/`.json`/`.jsonl`; JSON deve ser um array de objetos planos). `sample` toma cada `ceil(N/sample)`-ésima linha para os cartões de coluna (determinístico; as contagens de linhas continuam exatas). Retorna o relatório estruturado e renderiza um resumo legível por coluna.
+
+### `data_clean({ path, rules, outputPath? })`
+
+Aplica `rules` na ordem do array; cada regra vê a saída da anterior. Referência de regras:
+
+| Regra | Campos extras | Semântica |
+|---|---|---|
+| `dedupe` | `columns?` | Remove linhas cuja combinação de colunas-chave duplica uma linha anterior (a primeira é mantida; todas as colunas se omitido). |
+| `fill-missing` | `column`, `strategy`, `value?` | Preenche ausentes: `constant` (requer `value`), `mean`/`median` (colunas numéricas), `forward` (valor anterior não ausente). |
+| `coerce-type` | `column`, `to` | Converte para `number`/`date` (ISO)/`boolean`; falhas viram ausentes e são contadas. |
+| `normalize-unit` | `column`, `factors` | Remove o sufixo de unidade e multiplica (`{"万": 10000, "亿": 100000000}`); numéricos simples também convertem. |
+| `trim` | `columns?` | Apara espaços de células de texto (todas as colunas se omitido). |
+| `map-values` | `column`, `map`, `else?` | Mapeamento por correspondência exata; valores não mapeados ficam (`keep`, padrão) ou viram `missing`. |
+
+O arquivo de origem **nunca** é sobrescrito. Com `outputPath` o dataset limpo é gravado lá (confinado ao workspace, formato por extensão); sem ele a execução é apenas prévia.
+
+### `data_verify({ path, rules })`
+
+Avalia regras de verificação. Referência de regras:
+
+| Regra | Campos extras | Semântica |
+|---|---|---|
+| `not-null` | `column` | Falham células ausentes (null/vazio/só espaços). |
+| `unique` | `columns` | Falha cada linha cuja combinação-chave se repete (ausentes participam). |
+| `range` | `column`, `min?`, `max?` | Falham células ausentes/não parseáveis e valores fora dos limites inclusivos (pelo menos um limite obrigatório). |
+| `regex` | `column`, `pattern`, `flags?` | Falham células ausentes ou não correspondentes (regex JS completa). |
+| `enum` | `column`, `values` | Falham células cujo texto aparado não está na lista. |
+| `cross-column` | `left`, `op`, `rightColumn?`, `value?` | Compara por linha: numérico quando ambos os lados parseiam, datas como épocas, strings só para `==`/`!=` (exatamente um de `rightColumn`/`value`). |
+| `freshness` | `column`, `maxAgeDays`, `asOf?` | Falham datas mais velhas que `maxAgeDays` antes de `asOf` (padrão: agora); não parseável/ausente falha. |
+
+Uma célula ausente faz falhar toda regra que a lê. A evidência é limitada a `evidenceRowLimit` linhas falhas por regra.
+
+### `ctx.dataQuality` (para outros plugins)
+
+```ts
+const result = await ctx.dataQuality.verifyCitations({
+  dataset: 'holdings.csv',          // resolvido contra workspaceRoot
+  citations: [
+    { id: 'c1', path: 'rows[3].nav', value: 1.234, tolerance: 0.01 },
+    { id: 'c2', path: 'summary.annualReturn', value: '12.34%' },
+  ],
+})
+// result.results[i] = { id, status: 'verified' | 'mismatch' | 'not-found' | 'unverifiable', actual?, note? }
+```
+
+Os localizadores percorrem o documento do dataset: CSV/TSV carregam como `{ columns, rows }` (logo `rows[3].nav` resolve), JSON é o valor parseado, JSONL o array de linhas parseadas. Números comparam com tolerância relativa (`|a-b| <= tolerance * max(|a|, |b|)`); uma célula de texto CSV que parseia numericamente compara como número; strings comparam exatas; pares de tipos incomparáveis são `unverifiable`. O serviço também expõe `profileDataset` / `cleanDataset` / `verifyDataset` (as mesmas operações que as ferramentas chamam).
+
+## Permissions & data
+
+- **Lê** arquivos de dataset do workspace (apenas extensões permitidas).
+- **Escreve** apenas: o arquivo de saída do `data_clean` (`outputPath` explícito, confinado ao workspace, nunca a entrada) e os relatórios do domínio de armazenamento `data_quality` no diretório de dados do harness.
+- **Sem rede, sem credenciais, sem processos externos** — todo o parsing e a estatística são TypeScript em processo.
+- Os relatórios podem conter valores de célula de amostra dos seus datasets (limitados por `evidenceRowLimit` e pelo truncamento de exibição); o log de sessão regista argumentos e resultados de ferramentas como de costume.
+
+## Security boundaries
+
+- **Confinamento de caminhos** — caminhos de dataset e saída devem resolver dentro do workspace de sessão (`verifyCitations` usa `workspaceRoot`); escapes `..` e caminhos absolutos fora da raiz são rejeitados, e ambos os lados são normalizados antes da comparação (seguro com barras do Windows).
+- **Trabalho limitado** — as guardas `maxRows` / `maxFileSizeMB` rejeitam entradas sobredimensionadas ruidosamente; sinais de aborto cancelam cargas longas no meio.
+- **Sem sobrescrita** — `data_clean` recusa um `outputPath` igual ao caminho de entrada.
+- **Cálculo determinístico** — mesma entrada, mesma saída; o único relógio é o injetado para os padrões de `freshness` e os timestamps de relatórios.
+
+## Known limitations
+
+- **Os eventos de sessão são adaptativos.** 0.1.0-rc.6 não tem superfície de registo de eventos de sessão para plugins e o seu `Session.append` não consegue estampar a marca `ignorable`, logo anexar um tipo `data-quality/*` desconhecido tornaria o log de sessão ilegível ao restaurar. Por isso o plugin só anexa quando o host conhece o vocabulário ou suporta o flag `ignorable`; em rc.6 o relatório do domínio de armazenamento é o registo durável.
+- **Dialeto CSV** — vírgula/tab com aspas RFC-4180, linha de cabeçalho obrigatória, linhas em branco ignoradas; sem autodetecção de delimitador nem linhas de comentário.
+- **O parsing de tipos é estrito** — números sem separadores de milhares; datas são `YYYY-MM-DD` / `YYYY/MM/DD` / datetimes estilo ISO (UTC); booleanos são `true/false/yes/no/1/0`. Todo o resto é perfilado como `string`/`mixed` — limpe com `coerce-type` se for intencional.
+- **JSON tem de ser tabular para as ferramentas** (array de objetos planos); `verifyCitations` percorre documentos JSON arbitrários.
+- **Sem deteção de anomalias por ML, sem mascaramento de PII, sem bases de dados, sem SQL** — apenas notas de suspeita baseadas em regras.
+
+## Development
+
+```sh
+pnpm install
+pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
+pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
+```
+
+- Os testes correm vitest contra os `Context`/`Session`/`ToolRuntime`/domínio de armazenamento REAIS dos peers 0.1.0-rc.6 (sem mocks de serviços escritos à mão) mais specs de motores puros; cada regra de limpeza/verificação tem casos positivos e negativos, e `verifyCitations` cobre os quatro estados.
+- `scripts/loader-runner.mjs` arranca a composição real do Loader e executa a cadeia perfilar → limpar → verificar contra `fixtures/` sem chave de API.
+- Release: `node scripts/release.mjs <x.y.z>` (nunca faz push; a tag dispara `release.yml`).
+
+## Topics
+
+`dsh` · `dsh-plugin` · `deepseek-harness` · `cordis` · `data-quality` · `data-cleaning` · `data-profiling` · `data-verification`
+
+## Contributors
+
+Mantido pelos contribuidores do dsh-data-quality. Issues e pull requests são bem-vindos quando o repositório for público.
+
+## PerryLink DSH Plugin Family
+
+Este plugin segue as convenções de engenharia partilhadas da família DSH: empacotamento com manifesto bundle (`dsh.bundle` + `cordis.patch.yml`), READMEs em cinco línguas com verificação de sincronia, configuração Schemastery de falha ruidosa, cobertura vitest com serviços reais e a cadeia de três fluxos CI/compat/release.
+
+## License
+
+Apache-2.0 — ver [LICENSE](LICENSE) e [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

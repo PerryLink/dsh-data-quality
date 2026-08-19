@@ -1,0 +1,181 @@
+# dsh-data-quality
+
+**Deterministic data profiling, cleaning, and verification for DeepSeek Harness.**
+
+All computation is plain TypeScript in the harness process — the model never does the math. A `ctx.dataQuality` capability seam (Service Definition / local Provider / tool Consumers) exposes three model tools plus a frozen cross-plugin citation-checking contract.
+
+[English](README.md) · [简体中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+
+## Compatibility
+
+| Component | Version |
+|---|---|
+| DeepSeek Harness | `0.1.0-rc.6` (peer dependencies pinned) |
+| Node.js | `^22.19.0 \|\| >=24.0.0` |
+| Package manager | `pnpm@11.7.0` |
+| Platform | Windows / macOS / Linux (host-only plugin) |
+
+## What you get
+
+- **`ctx.dataQuality` service** — a Cordis service other plugins may optionally consume (`inject = ['dataQuality']`). Besides the three dataset operations behind the tools, it implements the frozen `verifyCitations(request)` contract: verify that numbers/strings cited in a document match a dataset snapshot, with relative-tolerance numeric comparison and `verified` / `mismatch` / `not-found` / `unverifiable` statuses.
+- **`data_profile` tool** — dataset profiling: row/column counts, inferred column types (number/date/boolean/string/empty/mixed), missing rates, unique counts, numeric distributions (min/max/mean/median/p25/p75), IQR outlier counts, mixed-type suspicion notes, and full-table duplicate-row counts. Optional deterministic systematic sampling for large files.
+- **`data_clean` tool** — ordered declarative cleaning rules: `dedupe` (by column group), `fill-missing` (constant/mean/median/forward), `coerce-type` (number/date/boolean; failures counted and set to missing), `normalize-unit` (e.g. 万/亿 suffixes to base units), `trim`, `map-values` (enum mapping). Returns a per-rule audit log plus a bounded preview; writes the cleaned dataset only when `outputPath` is given, and never overwrites the source.
+- **`data_verify` tool** — declarative verification rules: `not-null`, `unique`, `range`, `regex`, `enum`, `cross-column` (e.g. `startDate < endDate`), `freshness` (date column within N days of a reference date). Per-rule pass/fail with capped failing-row evidence; an overall failure is a normal `passed: false` result, not a tool error.
+- **Durable reports** — every profile/clean/verify/citation run persists to the `data_quality` storage domain (JSON backend), keyed by run timestamp plus a dataset-path fingerprint; the key is returned as `reportKey` in tool results.
+- **Session events** — on hosts that can carry them safely, runs append `data-quality/profile` / `data-quality/clean` / `data-quality/verify` events (with the `ignorable` marker where supported). On 0.1.0-rc.6 the append is skipped by design — the storage-domain report is always the durable copy (see "Known limitations").
+
+## Quick start
+
+### npm channel
+
+```sh
+dsh plugin --profile web add dsh-data-quality
+```
+
+### Tarball channel (no build permission needed)
+
+```sh
+pnpm pack                                  # produces dsh-data-quality-<version>.tgz
+dsh plugin --profile web add ./dsh-data-quality-<version>.tgz
+```
+
+### Git channel
+
+```sh
+dsh plugin --profile web add github:YOUR_ORG/dsh-data-quality#<commit-sha>
+```
+
+The first `add` fails because pnpm blocks the package's `prepare` build; copy the exact key pnpm printed into the profile's `pnpm-workspace.yaml` and re-run:
+
+```yaml
+allowBuilds:
+  'dsh-data-quality': true
+```
+
+Restart the profile after installing (bundles activate on restart). Then ask the agent, in a workspace containing a CSV:
+
+> Profile `holdings.csv`, then clean it by trimming whitespace, deduplicating on `fund_code`, and normalizing the `holding_value` column's 万/亿 units; finally verify `fund_code` is unique and not null.
+
+## Install & uninstall
+
+```sh
+dsh plugin --profile web add dsh-data-quality      # install (npm) — or the forms above
+dsh plugin --profile web remove dsh-data-quality   # uninstall
+```
+
+## Configuration
+
+All keys are optional (defaults shown); invalid values fail loudly at load. Every key is settable from `cordis.yml` (the bundle ships `cordis.patch.yml` with the same defaults).
+
+| Key | Default | Description |
+|---|---|---|
+| `enabled` | `true` | Master switch; `false` mounts nothing at all. |
+| `maxRows` | `200000` | Hard row cap per dataset load; larger inputs reject loudly (use the tool's `sample` parameter). |
+| `maxFileSizeMB` | `64` | Hard file-size cap in MiB per dataset load. |
+| `defaultTolerance` | `1e-9` | Default relative tolerance for numeric citation comparison when a citation omits `tolerance`. |
+| `evidenceRowLimit` | `20` | Cap on failing-row evidence (verify) and preview rows (clean) in one result. |
+| `allowedExtensions` | `['.csv', '.tsv', '.json', '.jsonl']` | Extensions accepted as datasets. |
+| `workspaceRoot` | `""` | Absolute root for SERVICE-level calls (e.g. `verifyCitations`) that carry no session workspace; empty = the harness process launch directory. Tool calls always use the session's workspace cwd. |
+| `storeReports` | `true` | Persist run reports to the `data_quality` storage domain and return `reportKey`. |
+
+## Tools & surfaces
+
+### `data_profile({ path, sample? })`
+
+Profiles a workspace dataset. `path` is workspace-relative (`.csv`/`.tsv`/`.json`/`.jsonl`; JSON must be an array of flat objects). `sample` takes every `ceil(N/sample)`-th row for the column cards (deterministic; row counts stay exact). Returns the structured report; renders a human-readable per-column summary.
+
+### `data_clean({ path, rules, outputPath? })`
+
+Applies `rules` in array order, each seeing the previous rule's output. Rule reference:
+
+| Rule | Extra fields | Semantics |
+|---|---|---|
+| `dedupe` | `columns?` | Remove rows whose key-column values duplicate an earlier row (first kept; all columns when omitted). |
+| `fill-missing` | `column`, `strategy`, `value?` | Fill missing cells: `constant` (needs `value`), `mean`/`median` (numeric columns), `forward` (previous non-missing). |
+| `coerce-type` | `column`, `to` | Coerce to `number`/`date` (ISO)/`boolean`; failures become missing and are counted in the log. |
+| `normalize-unit` | `column`, `factors` | Strip a unit suffix and multiply (`{"万": 10000, "亿": 100000000}`); plain numerics convert too. |
+| `trim` | `columns?` | Trim whitespace of string cells (all columns when omitted). |
+| `map-values` | `column`, `map`, `else?` | Exact-match mapping; unmapped values stay (`keep`, default) or become `missing`. |
+
+The source file is **never** overwritten. With `outputPath` the cleaned dataset is written there (workspace-confined, format by extension); without it the run is preview-only.
+
+### `data_verify({ path, rules })`
+
+Evaluates verification rules. Rule reference:
+
+| Rule | Extra fields | Semantics |
+|---|---|---|
+| `not-null` | `column` | Fail missing cells (null/empty/whitespace). |
+| `unique` | `columns` | Fail every row whose key combination repeats (missing participates). |
+| `range` | `column`, `min?`, `max?` | Fail missing/unparseable cells and values outside the inclusive bounds (at least one bound required). |
+| `regex` | `column`, `pattern`, `flags?` | Fail missing or non-matching cells (full JS regex). |
+| `enum` | `column`, `values` | Fail cells whose trimmed text is not listed. |
+| `cross-column` | `left`, `op`, `rightColumn?`, `value?` | Compare per row: numeric when both sides parse, dates compare as epochs, strings only for `==`/`!=` (exactly one of `rightColumn`/`value`). |
+| `freshness` | `column`, `maxAgeDays`, `asOf?` | Fail dates older than `maxAgeDays` before `asOf` (default: now); unparseable/missing fails. |
+
+A missing cell fails every rule that reads it. Evidence is capped at `evidenceRowLimit` failing rows per rule.
+
+### `ctx.dataQuality` (for other plugins)
+
+```ts
+const result = await ctx.dataQuality.verifyCitations({
+  dataset: 'holdings.csv',          // resolved against workspaceRoot
+  citations: [
+    { id: 'c1', path: 'rows[3].nav', value: 1.234, tolerance: 0.01 },
+    { id: 'c2', path: 'summary.annualReturn', value: '12.34%' },
+  ],
+})
+// result.results[i] = { id, status: 'verified' | 'mismatch' | 'not-found' | 'unverifiable', actual?, note? }
+```
+
+Locators walk the dataset document: CSV/TSV load as `{ columns, rows }` (so `rows[3].nav` resolves), JSON is the parsed value, JSONL the array of parsed lines. Numbers compare with relative tolerance (`|a-b| <= tolerance * max(|a|, |b|)`); a CSV string cell that parses numerically compares as a number; strings compare exactly; incomparable type pairs are `unverifiable`. The service also exposes `profileDataset` / `cleanDataset` / `verifyDataset` (the same operations the tools call).
+
+## Permissions & data
+
+- **Reads** workspace dataset files (allowlisted extensions only).
+- **Writes** only: the `data_clean` output file (explicit `outputPath`, workspace-confined, never the input) and reports in the `data_quality` storage domain under the harness data directory.
+- **No network, no credentials, no external processes** — all parsing and statistics are in-process TypeScript.
+- Reports may contain sample cell values from your datasets (bounded by `evidenceRowLimit` and display truncation); the session log records tool arguments and results as usual.
+
+## Security boundaries
+
+- **Path confinement** — dataset and output paths must resolve inside the session workspace (`verifyCitations` uses `workspaceRoot`); `..` escapes and outside absolute paths reject, and both sides are normalized before comparison (Windows slash-safe).
+- **Bounded work** — `maxRows` / `maxFileSizeMB` guards reject oversized inputs loudly; abort signals cancel long loads mid-stream.
+- **No overwrite** — `data_clean` refuses an `outputPath` equal to the input path.
+- **Deterministic computation** — same input, same output; the only clock is the one injected for `freshness` defaults and report timestamps.
+
+## Known limitations
+
+- **Session events are adaptive.** 0.1.0-rc.6 has no plugin session-event registration surface and its `Session.append` cannot stamp the `ignorable` marker, so appending an unknown `data-quality/*` type would make the session log unreadable on restore. The plugin therefore appends only when the host knows the vocabulary or supports the `ignorable` append flag; on rc.6 the storage-domain report is the durable record.
+- **CSV dialect** — comma/tab with RFC-4180 quoting, header row required, blank lines skipped, no delimiter auto-detection or comment lines.
+- **Type parsing is strict** — numbers have no thousands separators; dates are `YYYY-MM-DD` / `YYYY/MM/DD` / ISO-like datetimes (UTC); booleans are `true/false/yes/no/1/0`. Everything else profiles as `string`/`mixed` — clean it with `coerce-type` when intended.
+- **JSON must be tabular for the tools** (array of flat objects); `verifyCitations` walks arbitrary JSON documents.
+- **No ML anomaly detection, no PII masking, no databases, no SQL** — rule-based suspicion notes only.
+
+## Development
+
+```sh
+pnpm install
+pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
+pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
+```
+
+- Tests run vitest against the REAL `Context`/`Session`/`ToolRuntime`/storage domain from the 0.1.0-rc.6 peers (no hand-written service mocks) plus pure engine specs; every clean/verify rule has positive and negative cases, and `verifyCitations` covers all four statuses.
+- `scripts/loader-runner.mjs` boots the real Loader composition and executes the profile → clean → verify chain against `fixtures/` without an API key.
+- Release: `node scripts/release.mjs <x.y.z>` (never pushes; the tag triggers `release.yml`).
+
+## Topics
+
+`dsh` · `dsh-plugin` · `deepseek-harness` · `cordis` · `data-quality` · `data-cleaning` · `data-profiling` · `data-verification`
+
+## Contributors
+
+Maintained by the dsh-data-quality contributors. Issues and pull requests are welcome once the repository is public.
+
+## PerryLink DSH Plugin Family
+
+This plugin follows the shared DSH family engineering conventions: bundle-manifest packaging (`dsh.bundle` + `cordis.patch.yml`), five-language READMEs gated by a sync check, fail-loud Schemastery configuration, real-service vitest coverage, and a three-workflow CI/compat/release chain.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
