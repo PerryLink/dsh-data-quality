@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-21
+
+### Changed
+
+- Bumped the `@deepseek-ai/dsh-*` peer and dev dependencies to the 0.1.0-rc.8 release line (peers now `>=0.1.0-rc.8 <0.2.0`) and re-verified the full gate against the published rc.8 types. Session-event behavior is unchanged: rc.8 still exposes no plugin event-registration surface and no `ignorable` append option, so the adaptive gate keeps skipping the append and the storage-domain report stays the durable record.
+
 ## [0.1.0] - 2026-08-19
 
 ### Added
