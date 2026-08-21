@@ -2,7 +2,7 @@
  * Shared test harness: REAL Cordis `Context`, REAL `SessionStore`/`Session`,
  * the REAL storage seam (dsh-storage + dsh-storage-json backend + the
  * dsh-storage-domain facility) rooted in a per-mount temp directory, and the
- * REAL `ToolRuntime` from the 0.1.0-rc.6 peers. Nothing here is a hand-written
+ * REAL `ToolRuntime` from the 0.1.0-rc.8 peers. Nothing here is a hand-written
  * mock of a service. The workspace is a per-mount temp directory the tests
  * fill with fixture files.
  * @module dsh-data-quality/test/harness

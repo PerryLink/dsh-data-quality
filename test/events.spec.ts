@@ -1,7 +1,7 @@
 /**
- * Adaptive session-event gate tests: the rc.6 skip path, the KNOWN-type
- * plain-append path, and the master-build `ignorable` probe path — plus the
- * display-truncation helpers.
+ * Adaptive session-event gate tests: the unknown-type skip path (no
+ * `ignorable` support), the KNOWN-type plain-append path, and the
+ * master-build `ignorable` probe path — plus the display-truncation helpers.
  * @module dsh-data-quality/test/events.spec
  */
 
