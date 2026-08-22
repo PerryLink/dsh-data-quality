@@ -10,7 +10,7 @@ Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz
 
 | Componente | Versão |
 |---|---|
-| DeepSeek Harness | `0.1.0-rc.8` (dependências peer fixadas) |
+| DeepSeek Harness | `0.1.1-rc.2` (dependências peer fixadas) |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gerenciador de pacotes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin apenas de host) |
@@ -22,7 +22,7 @@ Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz
 - **Ferramenta `data_clean`** — regras declarativas de limpeza em ordem: `dedupe` (por grupo de colunas), `fill-missing` (constant/mean/median/forward), `coerce-type` (number/date/boolean; falhas contadas e viram ausentes), `normalize-unit` (p. ex. sufixos 万/亿 para unidades base), `trim`, `map-values` (mapeamento de enumerações). Retorna um log de auditoria por regra mais uma prévia limitada; só grava o dataset limpo quando `outputPath` é dado e nunca sobrescreve a origem.
 - **Ferramenta `data_verify`** — regras declarativas de verificação: `not-null`, `unique`, `range`, `regex`, `enum`, `cross-column` (p. ex. `startDate < endDate`), `freshness` (coluna de data dentro de N dias de uma data de referência). pass/fail por regra com evidência limitada de linhas falhas; uma falha geral é um resultado normal `passed: false`, não um erro de ferramenta.
 - **Relatórios duráveis** — cada execução de perfilamento/limpeza/verificação/citações persiste no domínio de armazenamento `data_quality` (backend JSON), com chave de timestamp mais impressão digital do caminho do dataset; a chave é retornada como `reportKey` nos resultados.
-- **Eventos de sessão** — em hosts que os suportam com segurança, as execuções anexam eventos `data-quality/profile` / `data-quality/clean` / `data-quality/verify` (com a marca `ignorable` onde suportado). Em 0.1.0-rc.8 o append é omitido por design — o relatório do domínio de armazenamento é sempre a cópia durável (ver «Known limitations»).
+- **Eventos de sessão** — em hosts que os suportam com segurança, as execuções anexam eventos `data-quality/profile` / `data-quality/clean` / `data-quality/verify` (com a marca `ignorable` onde suportado). Em 0.1.1-rc.2 o append é omitido por design — o relatório do domínio de armazenamento é sempre a cópia durável (ver «Known limitations»).
 
 ## Quick start
 
@@ -146,7 +146,7 @@ Os localizadores percorrem o documento do dataset: CSV/TSV carregam como `{ colu
 
 ## Known limitations
 
-- **Os eventos de sessão são adaptativos.** 0.1.0-rc.8 não tem superfície de registo de eventos de sessão para plugins e o seu `Session.append` não consegue estampar a marca `ignorable`, logo anexar um tipo `data-quality/*` desconhecido tornaria o log de sessão ilegível ao restaurar. Por isso o plugin só anexa quando o host conhece o vocabulário ou suporta o flag `ignorable`; em rc.8 o relatório do domínio de armazenamento é o registo durável.
+- **Os eventos de sessão são adaptativos.** 0.1.1-rc.2 não tem superfície de registo de eventos de sessão para plugins e o seu `Session.append` não consegue estampar a marca `ignorable`, logo anexar um tipo `data-quality/*` desconhecido tornaria o log de sessão ilegível ao restaurar. Por isso o plugin só anexa quando o host conhece o vocabulário ou suporta o flag `ignorable`; em rc.2 o relatório do domínio de armazenamento é o registo durável.
 - **Dialeto CSV** — vírgula/tab com aspas RFC-4180, linha de cabeçalho obrigatória, linhas em branco ignoradas; sem autodetecção de delimitador nem linhas de comentário.
 - **O parsing de tipos é estrito** — números sem separadores de milhares; datas são `YYYY-MM-DD` / `YYYY/MM/DD` / datetimes estilo ISO (UTC); booleanos são `true/false/yes/no/1/0`. Todo o resto é perfilado como `string`/`mixed` — limpe com `coerce-type` se for intencional.
 - **JSON tem de ser tabular para as ferramentas** (array de objetos planos); `verifyCitations` percorre documentos JSON arbitrários.
@@ -160,7 +160,7 @@ pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
 pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
 ```
 
-- Os testes correm vitest contra os `Context`/`Session`/`ToolRuntime`/domínio de armazenamento REAIS dos peers 0.1.0-rc.8 (sem mocks de serviços escritos à mão) mais specs de motores puros; cada regra de limpeza/verificação tem casos positivos e negativos, e `verifyCitations` cobre os quatro estados.
+- Os testes correm vitest contra os `Context`/`Session`/`ToolRuntime`/domínio de armazenamento REAIS dos peers 0.1.1-rc.2 (sem mocks de serviços escritos à mão) mais specs de motores puros; cada regra de limpeza/verificação tem casos positivos e negativos, e `verifyCitations` cobre os quatro estados.
 - `scripts/loader-runner.mjs` arranca a composição real do Loader e executa a cadeia perfilar → limpar → verificar contra `fixtures/` sem chave de API.
 - Release: `node scripts/release.mjs <x.y.z>` (nunca faz push; a tag dispara `release.yml`).
 
