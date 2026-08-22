@@ -5,7 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.2] - 2026-08-22
+
+### Changed
+
+- Bumped the `@deepseek-ai/dsh-*` dev dependencies to the 0.1.1-rc.2 release line (peers stay `>=0.1.0-rc.8 <0.2.0`; no rc.2-only API is used) and re-verified the full gate against the published 0.1.1-rc.2 types. Compatibility metadata (`dshWorkshop.compatibility.dshVersions`) now advertises `0.1.1-rc.2`, and the CI compat workflow pins the `dsh`/`dsh-base`/`dsh-headless` installs to 0.1.1-rc.2. Session-event behavior is unchanged: 0.1.1-rc.2 still exposes no plugin event-registration surface and no `ignorable` append option, so the adaptive gate keeps skipping the append and the storage-domain report stays the durable record.
 
 ## [0.1.1] - 2026-08-21
 
