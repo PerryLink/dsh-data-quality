@@ -176,7 +176,12 @@ pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:r
 
 ## Contributors
 
-Maintained by the dsh-data-quality contributors. Issues and pull requests are welcome once the repository is public.
+Thanks to everyone who has shaped this plugin.
+
+- **PerryLink** — maintenance and releases (`0.1.2`/`0.1.3`), peer-dependency upgrades, the npm version/downloads/CI badges, and recent fixes.
+- **dsh-data-quality contributors** — the initial scaffold, the `ctx.dataQuality` seam and frozen `verifyCitations` contract, the deterministic dataset layer and pure engines, the `data_quality` storage-domain reports, the real-service vitest suite, the CI/compat/release workflows, and the five-language READMEs.
+
+This repository has no public issue or pull request history yet; individual PR/issue numbers will be credited here as they arrive.
 
 ## PerryLink DSH Plugin Family
 

@@ -170,7 +170,12 @@ pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:r
 
 ## Contributors
 
-由 dsh-data-quality contributors 维护。仓库公开后欢迎 issue 与 pull request。
+感谢所有塑造本插件的贡献者。
+
+- **PerryLink** — 维护与发布（`0.1.2`/`0.1.3`）、peer 依赖升级、npm 版本/下载量/CI 徽章，以及近期修复。
+- **dsh-data-quality contributors** — 初始脚手架、`ctx.dataQuality` 能力缝与冻结的 `verifyCitations` 契约、确定性数据集层与纯引擎、`data_quality` storage-domain 报告、真实服务 vitest 套件、CI/compat/release 工作流，以及五语 README。
+
+本仓库暂无公开 issue 或 pull request 历史；后续将在此逐个记名 PR/issue 编号。
 
 ## PerryLink DSH Plugin Family
 
