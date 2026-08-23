@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a bug in dsh-data-quality
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more precise the report, the faster we can fix it.
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      description: The `dsh-data-quality` version in use (`node -p "require('./package.json').version"` or from your lockfile/cordis.yml).
+      placeholder: "0.1.3"
+    validations:
+      required: true
+  - type: input
+    id: harness-version
+    attributes:
+      label: Harness (dsh) version
+      description: The DeepSeek Harness version the plugin runs against.
+      placeholder: "0.1.1-rc.2"
+    validations:
+      required: true
+  - type: input
+    id: os-node
+    attributes:
+      label: OS and Node version
+      description: e.g. `Ubuntu 24.04 / Node 22.19.0` (`node -v`).
+      placeholder: "Ubuntu 24.04 / Node 22.19.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal, numbered steps (and a small sample dataset if possible) that reproduce the problem.
+      placeholder: |
+        1. Mount the bundle in a profile
+        2. Run `data_clean` with these rules ...
+        3. Observe the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened, including the exact error message.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Paste relevant logs or session excerpts below.
+        **Redact before pasting — never include tokens, API keys, secrets, or Authorization/request headers.**
+      render: shell
+    validations:
+      required: false

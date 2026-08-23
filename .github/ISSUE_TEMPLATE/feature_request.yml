@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest an enhancement for dsh-data-quality
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please describe the problem first — features that solve a real gap are the easiest to prioritize.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What problem are you trying to solve? What is missing or painful today?
+      placeholder: "I need to ... but there is no way to ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What would the feature look like? Describe the behavior or API you want.
+      placeholder: "A `data_xxx` tool / rule / config key that ..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative approaches you have already tried?
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that helps — examples, links, dataset shapes, related issues.
+    validations:
+      required: false
