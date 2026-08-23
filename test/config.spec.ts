@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { resolveConfig } from '../src/config.ts'
+import { Config, resolveConfig } from '../src/config.ts'
 import { reportKeyOf } from '../src/store.ts'
 
 describe('resolveConfig', () => {
@@ -38,6 +38,43 @@ describe('resolveConfig', () => {
     expect(config.maxRows).toBe(500)
     expect(config.storeReports).toBe(false)
     expect(config.workspaceRoot).toBe('/data')
+  })
+
+  it('fails loud on out-of-range numeric bounds', () => {
+    // maxRows must be a positive SAFE integer: non-integers, non-safe integers,
+    // zero, and NaN all reject.
+    expect(() => resolveConfig({ maxRows: Number.MAX_SAFE_INTEGER + 1 })).toThrowError(/maxRows/)
+    expect(() => resolveConfig({ maxRows: Number.NaN })).toThrowError(/maxRows/)
+    // maxFileSizeMB upper bound is 1024; zero and non-finite values reject.
+    expect(() => resolveConfig({ maxFileSizeMB: 1025 })).toThrowError(/maxFileSizeMB/)
+    expect(() => resolveConfig({ maxFileSizeMB: 0 })).toThrowError(/maxFileSizeMB/)
+    expect(() => resolveConfig({ maxFileSizeMB: Number.NaN })).toThrowError(/maxFileSizeMB/)
+    // defaultTolerance is bounded to [0, 1]; negative and NaN reject.
+    expect(() => resolveConfig({ defaultTolerance: -0.1 })).toThrowError(/defaultTolerance/)
+    expect(() => resolveConfig({ defaultTolerance: Number.NaN })).toThrowError(/defaultTolerance/)
+  })
+
+  it('fails loud on malformed allowedExtensions entries', () => {
+    expect(() => resolveConfig({ allowedExtensions: ['.CSV'] })).toThrowError(/dot-prefixed lowercase/)
+    expect(() => resolveConfig({ allowedExtensions: ['.csv '] })).toThrowError(/dot-prefixed lowercase/)
+    expect(() => resolveConfig({ allowedExtensions: ['..csv'] })).toThrowError(/dot-prefixed lowercase/)
+    expect(() => resolveConfig({ allowedExtensions: ['.csv', 'xlsx'] })).toThrowError(/dot-prefixed lowercase/)
+  })
+})
+
+describe('Config schema', () => {
+  it('validates types and fills defaults at the loader boundary', () => {
+    const resolved = Config({})
+    expect(resolved.maxRows).toBe(200_000)
+    expect(resolved.allowedExtensions).toEqual(['.csv', '.tsv', '.json', '.jsonl'])
+    expect(resolved.storeReports).toBe(true)
+  })
+
+  it('rejects wrong-typed values loudly', () => {
+    expect(() => Config({ maxRows: '200000' } as never)).toThrowError()
+    expect(() => Config({ maxFileSizeMB: '64' } as never)).toThrowError()
+    expect(() => Config({ allowedExtensions: '.csv' } as never)).toThrowError()
+    expect(() => Config({ storeReports: 'yes' } as never)).toThrowError()
   })
 })
 

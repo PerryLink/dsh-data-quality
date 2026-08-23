@@ -62,6 +62,25 @@ describe('apply', () => {
     expect(base.ctx.tools.get('data_profile')).toBeUndefined()
   })
 
+  it('removes the three tools and ctx.dataQuality from the authoritative registries on dispose', async () => {
+    const base = await mountBase('dq-dispose')
+    bases.push(base)
+    const fiber = await mountPlugin(base)
+    expect(base.ctx.dataQuality).toBeDefined()
+    expect(typeof base.ctx.dataQuality.verifyCitations).toBe('function')
+    for (const tool of ['data_profile', 'data_clean', 'data_verify']) {
+      expect(base.ctx.tools.get(tool), `${tool} before dispose`).toBeDefined()
+    }
+
+    await fiber.dispose()
+
+    for (const tool of ['data_profile', 'data_clean', 'data_verify']) {
+      expect(base.ctx.tools.get(tool), `${tool} after dispose`).toBeUndefined()
+    }
+    expect(base.ctx.tools.schemas().map((schema) => schema.name)).not.toContain('data_profile')
+    expect(base.ctx.dataQuality, 'ctx.dataQuality after dispose').toBeUndefined()
+  })
+
   it('runs data_profile through the real pipeline and persists the report', async () => {
     const base = await mountBase('dq-profile')
     bases.push(base)
