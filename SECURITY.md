@@ -6,7 +6,7 @@ Please **do not** open a public issue for security vulnerabilities.
 
 Report privately through GitHub's private vulnerability reporting:
 
-**https://github.com/YOUR_ORG/dsh-data-quality/security/advisories/new**
+**https://github.com/PerryLink/dsh-data-quality/security/advisories/new**
 
 That flow keeps the report confidential while we triage, and it is the channel we watch first.
 
