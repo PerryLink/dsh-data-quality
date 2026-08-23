@@ -125,23 +125,27 @@ export class LocalDataQualityService extends DataQualityService {
     }
 
     const generatedAt = this.deps.now()
+    // The preview is part of the model-visible canonical value, so it must
+    // also be part of the durable report: otherwise the clean result's preview
+    // could not be reconstructed from the session log (model-visible ⟺ logged).
+    const preview = { columns: result.columns, rows: result.rows.slice(0, this.config.evidenceRowLimit).map((row) => truncateRow(row)) }
     const reportKey = await this.persist('clean', request.dataset, {
       dataset: request.dataset,
       inputRows: result.inputRows,
       outputRows: result.outputRows,
       logs: result.logs,
+      preview,
       ...(writtenPath !== undefined ? { outputPath: writtenPath } : {}),
       generatedAt,
     } as unknown as Record<string, unknown>)
     this.emitEvent(request.session, 'clean', request.dataset, reportKey, { rows: result.outputRows, columns: result.columns.length, rules: result.logs.length })
 
-    const previewRows = result.rows.slice(0, this.config.evidenceRowLimit).map((row) => truncateRow(row))
     return {
       dataset: request.dataset,
       inputRows: result.inputRows,
       outputRows: result.outputRows,
       logs: result.logs,
-      preview: { columns: result.columns, rows: previewRows },
+      preview,
       ...(writtenPath !== undefined ? { outputPath: writtenPath } : {}),
       ...(reportKey !== undefined ? { reportKey } : {}),
       generatedAt,

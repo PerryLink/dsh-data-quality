@@ -21,7 +21,7 @@
 - **`data_profile` 工具** —— 数据集梳理：行/列数、推断列类型（number/date/boolean/string/empty/mixed）、缺失率、唯一值数、数值分布（min/max/mean/median/p25/p75）、IQR 离群计数、混合类型疑点提示、全表重复行计数。大文件可选确定性系统采样。
 - **`data_clean` 工具** —— 有序声明式清洗规则：`dedupe`（按列组）、`fill-missing`（常量/均值/中位数/前向填充）、`coerce-type`（number/date/boolean，失败计数并置缺失）、`normalize-unit`（万/亿 等单位后缀归一）、`trim`、`map-values`（枚举映射）。返回逐规则审计日志与有界预览；仅在给出 `outputPath` 时落盘，且绝不覆盖源文件。
 - **`data_verify` 工具** —— 声明式核查规则：`not-null`、`unique`、`range`、`regex`、`enum`、`cross-column`（如 `startDate < endDate`）、`freshness`（日期列距参考日期不超过 N 天）。逐规则 pass/fail 并附有界失败行证据；整体失败是正常结果 `passed: false`，不是工具错误。
-- **持久化报告** —— 每次梳理/清洗/核查/引用检查都写入 `data_quality` storage domain（JSON 后端），键为运行时间戳加数据集路径指纹；工具结果以 `reportKey` 返回该键。
+- **持久化报告** —— 每次梳理/清洗/核查/引用检查都写入 `data_quality` storage domain（JSON 后端），键为运行时间戳加数据集路径指纹；工具结果以 `reportKey` 返回该键。清洗报告同时持久化有界预览，因此任何模型可见结果都能仅凭 `reportKey` 重建。
 - **会话事件** —— 宿主支持时，运行会追加 `data-quality/profile` / `data-quality/clean` / `data-quality/verify` 事件（支持处带 `ignorable` 标记）。在 0.1.1-rc.2 上按设计跳过 append —— storage domain 报告始终是持久副本（见「Known limitations」）。
 
 ## Quick start
