@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { renderVerifyText, verifyTable, VerifyRuleError, type VerifyRule } from '../src/verify.ts'
+import { renderVerifyText, verifyExpectations, verifyTable, VerifyExpectationError, VerifyRuleError, type VerifyExpectation, type VerifyRule } from '../src/verify.ts'
 import { parseDelimited } from '../src/dataset.ts'
 import { resolveConfig } from '../src/config.ts'
 
@@ -17,6 +17,11 @@ const NOW = Date.UTC(2026, 7, 15)
 /** Run rules over CSV text. */
 function run(csv: string, rules: readonly VerifyRule[], evidenceRowLimit = config.evidenceRowLimit) {
   return verifyTable(parseDelimited(csv, ',', config), rules, { evidenceRowLimit, now: () => NOW })
+}
+
+/** Run expectations over CSV text. */
+function runExpectations(csv: string, expectations: readonly VerifyExpectation[], defaultTolerance = config.defaultTolerance) {
+  return verifyExpectations(parseDelimited(csv, ',', config), expectations, defaultTolerance)
 }
 
 describe('not-null', () => {
@@ -191,5 +196,80 @@ describe('engine behavior', () => {
     const text = renderVerifyText({ dataset: 't.csv', ...result })
     expect(text).toContain('FAILED')
     expect(text).toContain('row 1')
+  })
+})
+
+describe('expectations (metric reconciliation)', () => {
+  const table = 'a,b\n1,10\n2,20\n3,30\n'
+
+  it('reconciles rowCount exactly', () => {
+    const results = runExpectations(table, [{ metric: 'rowCount', expected: 3 }])
+    expect(results[0]).toMatchObject({ metric: 'rowCount', actual: 3, expected: 3, passed: true })
+  })
+
+  it('reports a mismatch with actual/expected/tolerance detail', () => {
+    const results = runExpectations(table, [{ metric: 'rowCount', expected: 4 }])
+    expect(results[0]?.passed).toBe(false)
+    expect(results[0]?.actual).toBe(3)
+    expect(results[0]?.expected).toBe(4)
+    expect(results[0]?.tolerance).toBe(config.defaultTolerance)
+  })
+
+  it('reconciles columnSum and columnMean', () => {
+    const results = runExpectations(table, [
+      { metric: 'columnSum', column: 'b', expected: 60 },
+      { metric: 'columnMean', column: 'b', expected: 20 },
+    ])
+    expect(results[0]?.passed).toBe(true)
+    expect(results[0]?.actual).toBe(60)
+    expect(results[1]?.passed).toBe(true)
+    expect(results[1]?.actual).toBe(20)
+  })
+
+  it('reconciles uniqueCount and nullCount', () => {
+    const results = runExpectations('a,b\n1,x\n2,y\n1,z\n,\n', [
+      { metric: 'uniqueCount', column: 'a', expected: 2 },
+      { metric: 'nullCount', column: 'a', expected: 1 },
+    ])
+    expect(results[0]?.passed).toBe(true)
+    expect(results[0]?.actual).toBe(2)
+    expect(results[1]?.passed).toBe(true)
+    expect(results[1]?.actual).toBe(1)
+  })
+
+  it('uses relative tolerance and falls back to the default', () => {
+    // 100000010 vs 100000000 differs by 10 (1e-7 relative); tolerance 1e-6 passes, 1e-9 fails.
+    const loose = runExpectations('a\n100000010\n', [{ metric: 'columnSum', column: 'a', expected: 100000000, tolerance: 1e-6 }])
+    expect(loose[0]?.passed).toBe(true)
+    const tight = runExpectations('a\n100000010\n', [{ metric: 'columnSum', column: 'a', expected: 100000000 }])
+    expect(tight[0]?.passed).toBe(false)
+  })
+
+  it('fails loud on invalid metric, column, and tolerance', () => {
+    expect(() => runExpectations(table, [{ metric: 'median', column: 'a', expected: 1 } as unknown as VerifyExpectation])).toThrowError(VerifyExpectationError)
+    expect(() => runExpectations(table, [{ metric: 'columnSum', column: 'nope', expected: 1 }])).toThrowError(/unknown column/)
+    expect(() => runExpectations(table, [{ metric: 'columnSum', column: 'a', expected: 1, tolerance: 2 }])).toThrowError(/tolerance/)
+    expect(() => runExpectations(table, [{ metric: 'columnSum', expected: 1 }])).toThrowError(/requires a column/)
+    expect(() => runExpectations(table, [{ metric: 'rowCount', column: 'a', expected: 1 }])).toThrowError(/takes no column/)
+  })
+
+  it('expectations join the overall verdict and are never capped by evidenceRowLimit', () => {
+    const many = Array.from({ length: 40 }, () => ({ metric: 'rowCount', expected: 3 }) as VerifyExpectation)
+    const result = verifyTable(parseDelimited(table, ',', config), [{ rule: 'not-null', column: 'a' }], {
+      evidenceRowLimit: 1,
+      now: () => NOW,
+      expectations: many,
+    })
+    expect(result.expectations).toHaveLength(40)
+    expect(result.passed).toBe(true)
+
+    const failing = verifyTable(parseDelimited(table, ',', config), [{ rule: 'not-null', column: 'a' }], {
+      evidenceRowLimit: 1,
+      now: () => NOW,
+      expectations: [{ metric: 'rowCount', expected: 99 }],
+    })
+    expect(failing.passed).toBe(false)
+    expect(failing.rules[0]?.passed).toBe(true)
+    expect(failing.expectations[0]?.passed).toBe(false)
   })
 })

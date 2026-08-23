@@ -68,12 +68,12 @@ describe('module face (C2)', () => {
 })
 
 describe('tool triple interface (U2)', () => {
-  it('registers all three tools in the model-facing schema registry', async () => {
+  it('registers all four tools in the model-facing schema registry', async () => {
     const base = await mountBase('dq-face-registry')
     bases.push(base)
     await mountPlugin(base)
     const names = base.ctx.tools.schemas().map((schema) => schema.name)
-    expect(names).toEqual(expect.arrayContaining(['data_profile', 'data_clean', 'data_verify']))
+    expect(names).toEqual(expect.arrayContaining(['data_profile', 'data_clean', 'data_verify', 'data_report']))
   })
 
   it('data_profile: schema + canonical + content block', async () => {
@@ -123,6 +123,29 @@ describe('tool triple interface (U2)', () => {
     assertObjectSchema(def?.output.schema, ['dataset', 'passed', 'rowCount', 'rules'], 'data_verify.output.schema')
 
     const result = await runTool(base, 'data_verify', { path: 'dirty.csv', rules: [{ rule: 'not-null', column: 'fund_code' }] })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    assertCanonicalAndContent(def as ToolDefinition, result.value, result.content)
+  })
+
+  it('data_report: schema + canonical + content block', async () => {
+    const base = await mountBase('dq-face-report')
+    bases.push(base)
+    await mountPlugin(base)
+    await writeFile(path.join(base.workspace, 'dirty.csv'), DIRTY_CSV)
+
+    const def = base.ctx.tools.get('data_report')
+    expect(def).toBeDefined()
+    assertObjectSchema(def?.parameters, [], 'data_report.parameters')
+    assertObjectSchema(def?.output.schema, ['records'], 'data_report.output.schema')
+
+    const profile = await runTool(base, 'data_profile', { path: 'dirty.csv' })
+    expect(profile.isError).toBe(false)
+    if (profile.isError) return
+    const reportKey = (profile.value as { reportKey?: string }).reportKey
+    expect(reportKey).toBeDefined()
+
+    const result = await runTool(base, 'data_report', { key: reportKey })
     expect(result.isError).toBe(false)
     if (result.isError) return
     assertCanonicalAndContent(def as ToolDefinition, result.value, result.content)

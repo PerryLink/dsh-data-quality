@@ -6,13 +6,19 @@
  * @module dsh-data-quality/profile
  */
 
-import { isMissing, parseBoolean, parseDate, parseNumeric, sampleRows, throwIfAborted, type Row, type Table } from './dataset.ts'
+import { createHash } from 'node:crypto'
+import { isMissing, parseBoolean, parseDate, parseNumeric, sampleRows, throwIfAborted, type EncodingInfo, type Row, type Table } from './dataset.ts'
+import { computeScorecard, type DataQualityScorecard, type ScorecardDimensionName } from './scorecard.ts'
 
 /** Inferred column type from parsed cell classes. */
 export type InferredType = 'number' | 'date' | 'boolean' | 'string' | 'empty' | 'mixed'
 
 /** Numeric distribution of one numeric column. */
 export interface NumericProfile {
+  /** Number of numeric values the distribution covers. */
+  readonly count: number
+  /** Distinct numeric values among the profiled rows. */
+  readonly distinct: number
   readonly min: number
   readonly max: number
   readonly mean: number
@@ -41,6 +47,16 @@ export interface ColumnProfile {
   notes: string[]
 }
 
+/** Full-content duplicate detection over ALL rows. */
+export interface DuplicateDetection {
+  /** Rows whose full sha256 content duplicates an earlier row. */
+  readonly duplicateRows: number
+  /** `duplicateRows / rowCount` (0 when the table has no rows). */
+  readonly duplicateRate: number
+  /** 0-based indexes of duplicated rows, capped by the sample limit. */
+  readonly duplicateSampleRowIndexes: number[]
+}
+
 /** The full profile report (also the persisted and tool-returned value). */
 export interface ProfileReport {
   readonly dataset: string
@@ -52,12 +68,23 @@ export interface ProfileReport {
   readonly columnCount: number
   /** Rows whose full content duplicates an earlier row (over ALL rows). */
   readonly duplicateRows: number
+  /** `duplicateRows / rowCount` (0 when the table has no rows). */
+  readonly duplicateRate: number
+  /** 0-based indexes of duplicated rows (capped by the configured sample limit). */
+  readonly duplicateSampleRowIndexes: number[]
+  /** DAMA six-dimension quality scorecard. */
+  readonly scorecard: DataQualityScorecard
+  /** Detected file encoding (BOM/UTF-8 validity); present only for file-loaded tables. */
+  readonly encoding?: EncodingInfo
   columns: ColumnProfile[]
   /** Storage-domain key of the persisted report, when persistence is on (set by the provider). */
   readonly reportKey?: string
   /** Injected generation timestamp (epoch ms). */
   readonly generatedAt: number
 }
+
+/** Fallback duplicate-sample cap for direct engine use; the provider always passes the configured `evidenceRowLimit`. */
+const DEFAULT_DUPLICATE_SAMPLE_LIMIT = 20
 
 /** Round to 6 significant digits for stable, readable report numbers. */
 function round6(value: number): number {
@@ -86,6 +113,8 @@ export function numericProfile(values: readonly number[]): NumericProfile | unde
   const highFence = p75 + 1.5 * iqr
   const outliers = iqr === 0 ? 0 : sorted.filter((value) => value < lowFence || value > highFence).length
   return {
+    count: sorted.length,
+    distinct: new Set(sorted).size,
     min: round6(sorted[0] as number),
     max: round6(sorted[sorted.length - 1] as number),
     mean: round6(sum / sorted.length),
@@ -96,20 +125,49 @@ export function numericProfile(values: readonly number[]): NumericProfile | unde
   }
 }
 
-/** Count rows whose full content duplicates an earlier row (first occurrence is not counted). */
-export function countDuplicateRows(table: Table, signal?: AbortSignal): number {
+/** Deterministic sha256 key of one row's full content (columns in table order). */
+function rowContentKey(table: Table, row: Row): string {
+  return createHash('sha256').update(JSON.stringify(table.columns.map((column) => row[column] ?? null))).digest('hex')
+}
+
+/**
+ * Detect full-content duplicate rows with a bounded sample of their 0-based
+ * indexes. The first occurrence of each content is never counted; later rows
+ * with identical full content are duplicates.
+ * @param table - the parsed dataset.
+ * @param options - sample cap and optional abort signal.
+ * @returns the duplicate count, rate, and capped sample indexes.
+ */
+export function detectDuplicateRows(
+  table: Table,
+  options: { sampleLimit: number; signal?: AbortSignal | undefined },
+): DuplicateDetection {
+  if (!Number.isSafeInteger(options.sampleLimit) || options.sampleLimit <= 0) {
+    throw new TypeError(`sampleLimit must be a positive safe integer, got ${String(options.sampleLimit)}`)
+  }
   const seen = new Set<string>()
   let duplicates = 0
+  const duplicateSampleRowIndexes: number[] = []
   for (const [index, row] of table.rows.entries()) {
-    if (index % 1024 === 0) throwIfAborted(signal)
-    const key = JSON.stringify(table.columns.map((column) => row[column] ?? null))
+    if (index % 1024 === 0) throwIfAborted(options.signal)
+    const key = rowContentKey(table, row)
     if (seen.has(key)) {
       duplicates += 1
+      if (duplicateSampleRowIndexes.length < options.sampleLimit) duplicateSampleRowIndexes.push(index)
     } else {
       seen.add(key)
     }
   }
-  return duplicates
+  return {
+    duplicateRows: duplicates,
+    duplicateRate: table.rows.length === 0 ? 0 : round6(duplicates / table.rows.length),
+    duplicateSampleRowIndexes,
+  }
+}
+
+/** Count rows whose full content duplicates an earlier row (first occurrence is not counted). */
+export function countDuplicateRows(table: Table, signal?: AbortSignal): number {
+  return detectDuplicateRows(table, { sampleLimit: 1, signal }).duplicateRows
 }
 
 /** Profile one column over the given rows. */
@@ -206,19 +264,38 @@ function profileColumn(rows: readonly Row[], column: string, signal?: AbortSigna
  */
 export function profileTable(
   table: Table,
-  options: { dataset: string; sample?: number | undefined; generatedAt: number; signal?: AbortSignal | undefined },
+  options: {
+    dataset: string
+    sample?: number | undefined
+    generatedAt: number
+    signal?: AbortSignal | undefined
+    duplicateSampleLimit?: number | undefined
+    declaredSchema?: Readonly<Record<string, InferredType>> | undefined
+    scorecardWeights?: Readonly<Record<ScorecardDimensionName, number>> | undefined
+  },
 ): ProfileReport {
   throwIfAborted(options.signal)
   const profiled = options.sample === undefined ? table.rows : sampleRows(table.rows, options.sample)
   const columns = table.columns.map((column) => profileColumn(profiled, column, options.signal))
-  const duplicateRows = countDuplicateRows(table, options.signal)
+  const detection = detectDuplicateRows(table, { sampleLimit: options.duplicateSampleLimit ?? DEFAULT_DUPLICATE_SAMPLE_LIMIT, signal: options.signal })
+  const scorecard = computeScorecard(table, {
+    now: options.generatedAt,
+    duplicateRows: detection.duplicateRows,
+    declaredSchema: options.declaredSchema,
+    weights: options.scorecardWeights,
+    signal: options.signal,
+  })
   return {
     dataset: options.dataset,
     rowCount: table.rows.length,
     sampled: profiled.length !== table.rows.length,
     profiledRows: profiled.length,
     columnCount: table.columns.length,
-    duplicateRows,
+    duplicateRows: detection.duplicateRows,
+    duplicateRate: detection.duplicateRate,
+    duplicateSampleRowIndexes: detection.duplicateSampleRowIndexes,
+    scorecard,
+    ...(table.encoding !== undefined ? { encoding: table.encoding } : {}),
     columns,
     generatedAt: options.generatedAt,
   }
@@ -229,14 +306,17 @@ export function renderProfileText(report: ProfileReport): string {
   const lines: string[] = []
   lines.push(`Profile of ${report.dataset}: ${report.rowCount} rows x ${report.columnCount} columns` +
     (report.sampled ? ` (column cards over a systematic sample of ${report.profiledRows} rows)` : ''))
-  if (report.duplicateRows > 0) lines.push(`Duplicate rows: ${report.duplicateRows}`)
+  if (report.duplicateRows > 0) {
+    lines.push(`Duplicate rows: ${report.duplicateRows} (${(report.duplicateRate * 100).toFixed(1)}%)` +
+      (report.duplicateSampleRowIndexes.length > 0 ? `; sample row indexes: ${report.duplicateSampleRowIndexes.join(', ')}` : ''))
+  }
   for (const column of report.columns) {
     const parts = [`${column.name}: ${column.inferredType}`]
     if (column.missing > 0) parts.push(`missing ${column.missing} (${(column.missingRate * 100).toFixed(1)}%)`)
     parts.push(`unique ${column.unique}`)
     if (column.numeric !== undefined) {
       parts.push(
-        `min ${column.numeric.min}, p25 ${column.numeric.p25}, median ${column.numeric.median}, p75 ${column.numeric.p75}, max ${column.numeric.max}, mean ${column.numeric.mean}` +
+        `count ${column.numeric.count}, distinct ${column.numeric.distinct}, min ${column.numeric.min}, p25 ${column.numeric.p25}, median ${column.numeric.median}, p75 ${column.numeric.p75}, max ${column.numeric.max}, mean ${column.numeric.mean}` +
           (column.numeric.outliers > 0 ? `, ${column.numeric.outliers} IQR outliers` : ''),
       )
     }
@@ -245,6 +325,16 @@ export function renderProfileText(report: ProfileReport): string {
     }
     for (const note of column.notes) parts.push(`note: ${note}`)
     lines.push(`- ${parts.join('; ')}`)
+  }
+  if (report.encoding !== undefined) {
+    lines.push(`Encoding: UTF-8${report.encoding.bom === 'utf-8' ? ' (BOM)' : ''}${report.encoding.validUtf8 ? '' : ' (INVALID UTF-8)'}`)
+  }
+  const overall = report.scorecard.overall
+  const weighted = report.scorecard.weightedOverall
+  lines.push(`Scorecard (overall ${overall === null ? 'undetermined' : `${(overall * 100).toFixed(1)}%`}, weighted ${weighted === null ? 'undetermined' : `${(weighted * 100).toFixed(1)}%`}):`)
+  for (const dimension of report.scorecard.dimensions) {
+    const value = dimension.score === null ? 'undetermined' : `${(dimension.score * 100).toFixed(1)}%`
+    lines.push(`  ${dimension.name}: ${value} (${dimension.note})`)
   }
   return lines.join('\n')
 }

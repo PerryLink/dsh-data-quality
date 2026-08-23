@@ -23,14 +23,15 @@ import { LocalDataQualityService } from './provider-local.ts'
 import { defineProfileTool } from './tools/profile.ts'
 import { defineCleanTool } from './tools/clean.ts'
 import { defineVerifyTool } from './tools/verify.ts'
+import { defineReportTool } from './tools/report.ts'
 import { VERSION } from './version.ts'
 
 export const name = 'data-quality'
-/** The three model tools and the durable report domain. */
+/** The four model tools and the durable report domain. */
 export const inject = ['tools', 'storageDomain']
 
 export { Config, resolveConfig } from './config.ts'
-export type { Config as DataQualityConfig, ResolvedConfig } from './config.ts'
+export type { Config as DataQualityConfig, ResolvedConfig, ScorecardWeights } from './config.ts'
 export { VERSION } from './version.ts'
 export {
   DataQualityService,
@@ -43,16 +44,21 @@ export {
 } from './service.ts'
 export { LocalDataQualityService, type ProviderDeps } from './provider-local.ts'
 export type { CleanRule, CleanRuleLog, CleanResult } from './clean.ts'
-export type { ProfileReport, ColumnProfile, NumericProfile } from './profile.ts'
-export type { VerifyRule, VerifyReport, VerifyRuleResult, VerifyEvidenceRow } from './verify.ts'
-export { parseLocator, checkCitations } from './verify.ts'
-export { profileTable, renderProfileText } from './profile.ts'
+export { computeCleanContract, computeCleanProfileDiff, type CleanContractSummary, type CleanProfileDiff } from './contract.ts'
+export type { ProfileReport, ColumnProfile, NumericProfile, DuplicateDetection, InferredType } from './profile.ts'
+export type { VerifyRule, VerifyReport, VerifyRuleResult, VerifyEvidenceRow, VerifyExpectation, VerifyExpectationResult, VerifyMetric } from './verify.ts'
+export { parseLocator, checkCitations, verifyExpectations, VerifyExpectationError } from './verify.ts'
+export { profileTable, renderProfileText, detectDuplicateRows, countDuplicateRows, numericProfile } from './profile.ts'
+export { computeScorecard, type DataQualityScorecard, type ScorecardDimension, type ScorecardDimensionName } from './scorecard.ts'
+export { INDUSTRY_PRESETS, INDUSTRY_PRESET_IDS, resolveIndustryPreset, type IndustryPreset } from './presets.ts'
 export { applyCleanRules, serializeDelimited } from './clean.ts'
 export { verifyTable, renderVerifyText } from './verify.ts'
 export {
   DatasetError,
   loadTable,
   loadDocument,
+  readDatasetFile,
+  detectEncoding,
   parseDelimited,
   parseJsonTable,
   resolveWorkspacePath,
@@ -60,13 +66,18 @@ export {
   isMissing,
   parseNumeric,
   parseDate,
+  parseDateCell,
+  dateFormatOf,
   parseBoolean,
   type Table,
   type Row,
   type Cell,
   type DocumentRoot,
+  type DateParse,
+  type DateFormat,
+  type EncodingInfo,
 } from './dataset.ts'
-export { dataQualityDomainSpec, reportKeyOf, reportRecordSchema, type ReportRecord, type ReportStore } from './store.ts'
+export { dataQualityDomainSpec, reportKeyOf, reportRecordSchema, isValidReportKey, type ReportRecord, type ReportStore, type StoredReport } from './store.ts'
 export { DATA_QUALITY_EVENT_TYPES, appendDataQualityEvent, type DataQualityEventData, type DataQualityEventType } from './events.ts'
 export { MAX_CELL_TEXT, truncateCell, truncateRow } from './present.ts'
 
@@ -97,6 +108,11 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
         return key
       },
       get: (key) => reports.get(key),
+      list: (kind) =>
+        [...reports.entries()]
+          .filter(([, record]) => record.kind === kind)
+          .sort(([keyA], [keyB]) => (keyA < keyB ? -1 : keyA > keyB ? 1 : 0))
+          .map(([key, record]) => ({ key, ...record })),
     }
   }
 
@@ -104,7 +120,8 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
   ctx.tools.register(defineProfileTool(service))
   ctx.tools.register(defineCleanTool(service))
   ctx.tools.register(defineVerifyTool(service))
-  logger.info(`dsh-data-quality ${VERSION} mounted: ctx.dataQuality + data_profile/data_clean/data_verify`)
+  ctx.tools.register(defineReportTool(service))
+  logger.info(`dsh-data-quality ${VERSION} mounted: ctx.dataQuality + data_profile/data_clean/data_verify/data_report`)
 
   if (domain !== undefined) {
     const handle = domain

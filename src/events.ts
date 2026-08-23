@@ -33,6 +33,8 @@ export interface DataQualityEventData {
     readonly rules?: number
     readonly failedRules?: number
     readonly passed?: boolean
+    readonly expectations?: number
+    readonly failedExpectations?: number
   }
 }
 

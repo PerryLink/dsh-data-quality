@@ -44,13 +44,13 @@ async function readReport(base: BaseHarness, key: string): Promise<ReportRecord 
 }
 
 describe('apply', () => {
-  it('publishes ctx.dataQuality and registers the three tools', async () => {
+  it('publishes ctx.dataQuality and registers the four tools', async () => {
     const base = await mountBase('dq-register')
     bases.push(base)
     await mountPlugin(base)
     expect(base.ctx.dataQuality).toBeDefined()
     expect(typeof base.ctx.dataQuality.verifyCitations).toBe('function')
-    for (const tool of ['data_profile', 'data_clean', 'data_verify']) {
+    for (const tool of ['data_profile', 'data_clean', 'data_verify', 'data_report']) {
       expect(base.ctx.tools.get(tool)).toBeDefined()
     }
   })
@@ -60,21 +60,22 @@ describe('apply', () => {
     bases.push(base)
     await mountPlugin(base, { enabled: false })
     expect(base.ctx.tools.get('data_profile')).toBeUndefined()
+    expect(base.ctx.tools.get('data_report')).toBeUndefined()
   })
 
-  it('removes the three tools and ctx.dataQuality from the authoritative registries on dispose', async () => {
+  it('removes the four tools and ctx.dataQuality from the authoritative registries on dispose', async () => {
     const base = await mountBase('dq-dispose')
     bases.push(base)
     const fiber = await mountPlugin(base)
     expect(base.ctx.dataQuality).toBeDefined()
     expect(typeof base.ctx.dataQuality.verifyCitations).toBe('function')
-    for (const tool of ['data_profile', 'data_clean', 'data_verify']) {
+    for (const tool of ['data_profile', 'data_clean', 'data_verify', 'data_report']) {
       expect(base.ctx.tools.get(tool), `${tool} before dispose`).toBeDefined()
     }
 
     await fiber.dispose()
 
-    for (const tool of ['data_profile', 'data_clean', 'data_verify']) {
+    for (const tool of ['data_profile', 'data_clean', 'data_verify', 'data_report']) {
       expect(base.ctx.tools.get(tool), `${tool} after dispose`).toBeUndefined()
     }
     expect(base.ctx.tools.schemas().map((schema) => schema.name)).not.toContain('data_profile')
@@ -222,5 +223,176 @@ describe('apply', () => {
       ],
     })
     expect(result.results.map((entry) => entry.status)).toEqual(['verified', 'verified', 'not-found'])
+  })
+
+  it('reads persisted reports back through data_report (by key and by kind)', async () => {
+    const base = await mountBase('dq-report')
+    bases.push(base)
+    await mountPlugin(base)
+    await seedDirty(base)
+    const profile = await runTool(base, 'data_profile', { path: 'dirty.csv' })
+    expect(profile.isError).toBe(false)
+    if (profile.isError) return
+    const reportKey = (profile.value as unknown as ProfileReport).reportKey as string
+
+    const byKey = await runTool(base, 'data_report', { key: reportKey })
+    expect(byKey.isError).toBe(false)
+    if (byKey.isError) return
+    const byKeyValue = byKey.value as { key: string; records: Array<{ key: string; kind: string; report: Record<string, unknown> }> }
+    expect(byKeyValue.records).toHaveLength(1)
+    expect(byKeyValue.records[0]?.key).toBe(reportKey)
+    expect(byKeyValue.records[0]?.kind).toBe('profile')
+    expect((byKeyValue.records[0]?.report as { rowCount: number }).rowCount).toBe(10)
+
+    const byKind = await runTool(base, 'data_report', { kind: 'profile' })
+    expect(byKind.isError).toBe(false)
+    if (byKind.isError) return
+    const byKindValue = byKind.value as { kind: string; records: Array<{ key: string }> }
+    expect(byKindValue.records.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('fails loud on an invalid or missing reportKey', async () => {
+    const base = await mountBase('dq-report-missing')
+    bases.push(base)
+    await mountPlugin(base)
+    const missing = await runTool(base, 'data_report', { key: '20260819000000000-profile-00000000' })
+    expect(missing.isError).toBe(true)
+    if (!missing.isError) return
+    expect(missing.error.message).toMatch(/no persisted report/)
+
+    const invalid = await runTool(base, 'data_report', { key: '../evil/key' })
+    expect(invalid.isError).toBe(true)
+    if (!invalid.isError) return
+    expect(invalid.error.message).toMatch(/invalid reportKey/)
+  })
+
+  it('data_clean dryRun returns the plan and expected contract/diff without writing', async () => {
+    const base = await mountBase('dq-clean-dryrun')
+    bases.push(base)
+    await mountPlugin(base)
+    await seedDirty(base)
+    const result = await runTool(base, 'data_clean', {
+      path: 'dirty.csv',
+      rules: [{ rule: 'trim' }, { rule: 'dedupe', columns: ['fund_code'] }],
+      outputPath: 'cleaned.csv',
+      dryRun: true,
+    })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    const value = result.value as unknown as CleanRunReport
+    expect(value.dryRun).toBe(true)
+    expect(value.outputPath).toBeUndefined()
+    expect(value.reportKey).toBeUndefined()
+    expect(value.contract.columnDecisions.length).toBeGreaterThan(0)
+    expect(value.diffPreview).toBeDefined()
+    expect(value.diffPreview?.before.rowCount).toBe(10)
+    expect(value.diffPreview?.after.rowCount).toBe(8)
+    // No cleaned output file was written.
+    await expect(readFile(path.join(base.workspace, 'cleaned.csv'), 'utf8')).rejects.toThrow()
+  })
+
+  it('data_profile industryPreset feeds the scorecard accuracy dimension', async () => {
+    const base = await mountBase('dq-profile-preset')
+    bases.push(base)
+    await mountPlugin(base)
+    await writeFile(path.join(base.workspace, 'fund.csv'), 'fund_code,fund_name,nav,nav_date,holding_value,currency\nF1,Alpha,1.2,2026-08-01,1000,CNY\n')
+    const result = await runTool(base, 'data_profile', { path: 'fund.csv', industryPreset: 'fund' })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    const scorecard = (result.value as unknown as ProfileReport).scorecard
+    const accuracy = scorecard.dimensions.find((dimension) => dimension.name === 'accuracy')
+    expect(accuracy?.score).toBe(1)
+
+    const unknown = await runTool(base, 'data_profile', { path: 'fund.csv', industryPreset: 'nope' })
+    expect(unknown.isError).toBe(true)
+    if (!unknown.isError) return
+    expect(unknown.error.message).toMatch(/must be one of/)
+
+    // The service-level path also fails loud on an unknown preset.
+    await expect(
+      base.ctx.dataQuality.profileDataset({ dataset: 'fund.csv', industryPreset: 'nope', workspace: base.workspace }),
+    ).rejects.toThrowError(/unknown industryPreset/)
+  })
+
+  it('data_verify reconciles expectations through the tool (service + tool layer)', async () => {
+    const base = await mountBase('dq-verify-expectations')
+    bases.push(base)
+    await mountPlugin(base)
+    await seedDirty(base)
+    const result = await runTool(base, 'data_verify', {
+      path: 'dirty.csv',
+      rules: [{ rule: 'not-null', column: 'fund_code' }],
+      expectations: [
+        { metric: 'rowCount', expected: 10 },
+        { metric: 'nullCount', column: 'nav', expected: 1 },
+        { metric: 'uniqueCount', column: 'fund_code', expected: 8 },
+      ],
+    })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    const value = result.value as unknown as VerifyReport
+    expect(value.expectations).toHaveLength(3)
+    expect(value.expectations.every((expectation) => expectation.passed)).toBe(true)
+    expect(value.passed).toBe(true)
+    const persisted = await readReport(base, value.reportKey as string)
+    expect(persisted?.kind).toBe('verify')
+    expect((persisted?.report.expectations as unknown[] | undefined)?.length).toBe(3)
+  })
+
+  it('data_verify expectations fail as a normal passed:false verdict (never a tool error)', async () => {
+    const base = await mountBase('dq-verify-expectations-mismatch')
+    bases.push(base)
+    await mountPlugin(base)
+    await seedDirty(base)
+    const result = await runTool(base, 'data_verify', {
+      path: 'dirty.csv',
+      rules: [{ rule: 'not-null', column: 'fund_code' }],
+      expectations: [{ metric: 'rowCount', expected: 999 }],
+    })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    const value = result.value as unknown as VerifyReport
+    expect(value.passed).toBe(false)
+    expect(value.expectations[0]?.passed).toBe(false)
+    expect(value.expectations[0]?.actual).toBe(10)
+    expect(value.expectations[0]?.expected).toBe(999)
+  })
+
+  it('dryRun combined with storeReports:false returns no reportKey and writes nothing', async () => {
+    const base = await mountBase('dq-dryrun-nostore')
+    bases.push(base)
+    await mountPlugin(base, { storeReports: false })
+    await seedDirty(base)
+    const result = await runTool(base, 'data_clean', {
+      path: 'dirty.csv',
+      rules: [{ rule: 'trim' }],
+      outputPath: 'cleaned.csv',
+      dryRun: true,
+    })
+    expect(result.isError).toBe(false)
+    if (result.isError) return
+    const value = result.value as unknown as CleanRunReport
+    expect(value.dryRun).toBe(true)
+    expect(value.reportKey).toBeUndefined()
+    expect(value.diffPreview).toBeDefined()
+    await expect(readFile(path.join(base.workspace, 'cleaned.csv'), 'utf8')).rejects.toThrow()
+  })
+
+  it('data_report reads back a profile produced with industryPreset (accuracy preserved)', async () => {
+    const base = await mountBase('dq-report-preset')
+    bases.push(base)
+    await mountPlugin(base)
+    await writeFile(path.join(base.workspace, 'fund.csv'), 'fund_code,fund_name,nav,nav_date,holding_value,currency\nF1,Alpha,1.2,2026-08-01,1000,CNY\n')
+    const profile = await runTool(base, 'data_profile', { path: 'fund.csv', industryPreset: 'fund' })
+    expect(profile.isError).toBe(false)
+    if (profile.isError) return
+    const reportKey = (profile.value as unknown as ProfileReport).reportKey as string
+
+    const report = await runTool(base, 'data_report', { key: reportKey })
+    expect(report.isError).toBe(false)
+    if (report.isError) return
+    const record = (report.value as { records: Array<{ report: { scorecard: { dimensions: Array<{ name: string; score: number | null }> } } }> }).records[0]
+    const accuracy = record?.report.scorecard.dimensions.find((dimension) => dimension.name === 'accuracy')
+    expect(accuracy?.score).toBe(1)
   })
 })

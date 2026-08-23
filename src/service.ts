@@ -11,8 +11,10 @@
 import { Service, type Context } from '@deepseek-ai/cordis'
 import type { JsonValue, Session } from '@deepseek-ai/dsh-session'
 import type { CleanRule, CleanRuleLog } from './clean.ts'
+import type { CleanContractSummary, CleanProfileDiff } from './contract.ts'
 import type { ProfileReport } from './profile.ts'
-import type { VerifyReport, VerifyRule } from './verify.ts'
+import type { VerifyExpectation, VerifyReport, VerifyRule } from './verify.ts'
+import type { ReportRecord, StoredReport } from './store.ts'
 
 export interface CitationCheckRequest {
   /** Workspace-relative path of the source dataset snapshot (CSV/JSON). */
@@ -46,6 +48,8 @@ export interface ProfileRequest {
   readonly dataset: string
   /** Optional deterministic systematic sample size for column cards. */
   readonly sample?: number | undefined
+  /** Optional industry preset id; its expected columns feed the scorecard's declared schema. */
+  readonly industryPreset?: string | undefined
   /** Absolute workspace root the dataset resolves inside. */
   readonly workspace: string
   /** Calling session (receives the `data-quality/profile` event), when any. */
@@ -62,6 +66,8 @@ export interface CleanRequest {
   readonly rules: readonly CleanRule[]
   /** Workspace-relative output path; omitted = no disk write, preview only. */
   readonly outputPath?: string | undefined
+  /** Dry run: no file written, no report persisted; returns the plan + expected contract/diff preview. */
+  readonly dryRun?: boolean | undefined
   /** Absolute workspace root the dataset resolves inside. */
   readonly workspace: string
   /** Calling session (receives the `data-quality/clean` event), when any. */
@@ -76,6 +82,8 @@ export interface VerifyRequest {
   readonly dataset: string
   /** Non-empty declarative verification rule list. */
   readonly rules: readonly VerifyRule[]
+  /** Optional metric expectations to reconcile (rowCount/columnSum/columnMean/uniqueCount/nullCount). */
+  readonly expectations?: readonly VerifyExpectation[] | undefined
   /** Absolute workspace root the dataset resolves inside. */
   readonly workspace: string
   /** Calling session (receives the `data-quality/verify` event), when any. */
@@ -89,9 +97,15 @@ export interface CleanRunReport {
   readonly dataset: string
   readonly inputRows: number
   readonly outputRows: number
+  /** Whether this was a dry run (no file written, no report persisted). */
+  readonly dryRun: boolean
   readonly logs: CleanRuleLog[]
+  /** Pre-delivery contract validation summary (dedupe/uniqueness/non-null/type/decision regressions). */
+  readonly contract: CleanContractSummary
   /** First `evidenceRowLimit` cleaned rows for inspection (display-truncated). */
   readonly preview: { readonly columns: string[]; readonly rows: Array<Record<string, JsonValue>> }
+  /** Expected before/after profile diff preview; present only for dry runs. */
+  readonly diffPreview?: CleanProfileDiff
   /** Workspace-relative output path when the run wrote a file. */
   readonly outputPath?: string
   /** Storage-domain key of the persisted report, when persistence is on. */
@@ -157,6 +171,22 @@ export abstract class DataQualityService extends Service {
    * @returns the verify report.
    */
   abstract verifyDataset(request: VerifyRequest): Promise<VerifyReport>
+
+  /**
+   * Read one persisted report by its storage key. The key is validated
+   * against the deterministic report-key format (path-safe) and a missing
+   * record fails loud.
+   * @param key - the storage report key.
+   * @returns the stored report (with its key).
+   */
+  abstract getReport(key: string): Promise<StoredReport>
+
+  /**
+   * List every persisted report of one kind, ordered by key (chronological).
+   * @param kind - the report kind.
+   * @returns the stored reports (empty when none match).
+   */
+  abstract listReports(kind: ReportRecord['kind']): Promise<StoredReport[]>
 }
 
 declare module '@deepseek-ai/cordis' {
@@ -168,5 +198,7 @@ declare module '@deepseek-ai/cordis' {
 
 /** Re-exports so consumers pull the whole seam vocabulary from one module. */
 export type { CleanResult, CleanRule, CleanRuleLog } from './clean.ts'
+export type { CleanContractSummary, CleanProfileDiff } from './contract.ts'
 export type { ProfileReport } from './profile.ts'
-export type { VerifyReport, VerifyRule } from './verify.ts'
+export type { VerifyReport, VerifyRule, VerifyExpectation, VerifyExpectationResult, VerifyMetric } from './verify.ts'
+export type { ReportRecord, StoredReport } from './store.ts'

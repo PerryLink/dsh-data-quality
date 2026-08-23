@@ -7,6 +7,29 @@
 
 import z from '@deepseek-ai/schemastery'
 
+/** Per-dimension scorecard weights (all optional; defaults fill to `1` = equal). */
+export interface ScorecardWeights {
+  completeness?: number
+  uniqueness?: number
+  validity?: number
+  consistency?: number
+  timeliness?: number
+  accuracy?: number
+}
+
+/** The six scorecard dimension ids, in report order (kept in sync with `scorecard.ts`). */
+const SCORECARD_DIMENSIONS = ['completeness', 'uniqueness', 'validity', 'consistency', 'timeliness', 'accuracy'] as const
+
+/** Equal-weight defaults for {@link ScorecardWeights}. */
+const EQUAL_WEIGHTS: Required<ScorecardWeights> = {
+  completeness: 1,
+  uniqueness: 1,
+  validity: 1,
+  consistency: 1,
+  timeliness: 1,
+  accuracy: 1,
+}
+
 /** Raw plugin config — every field optional; {@link resolveConfig} supplies the defaults. */
 export interface Config {
   /** Master switch; `false` mounts nothing. */
@@ -25,6 +48,8 @@ export interface Config {
   workspaceRoot?: string
   /** Persist reports to the `data_quality` storage domain. */
   storeReports?: boolean
+  /** Per-dimension weights for the scorecard's weighted overall total (non-negative). */
+  scorecardWeights?: ScorecardWeights
 }
 
 /** Fully resolved config handed to the runtime. */
@@ -37,6 +62,7 @@ export interface ResolvedConfig {
   readonly allowedExtensions: readonly string[]
   readonly workspaceRoot: string
   readonly storeReports: boolean
+  readonly scorecardWeights: Required<ScorecardWeights>
 }
 
 /** Schemastery schema: the loader validates and fills defaults before `apply`. */
@@ -49,6 +75,16 @@ export const Config: z<Config> = z.object({
   allowedExtensions: z.array(z.string()).default(['.csv', '.tsv', '.json', '.jsonl']),
   workspaceRoot: z.string().default(''),
   storeReports: z.boolean().default(true),
+  scorecardWeights: z
+    .object({
+      completeness: z.number().default(1),
+      uniqueness: z.number().default(1),
+      validity: z.number().default(1),
+      consistency: z.number().default(1),
+      timeliness: z.number().default(1),
+      accuracy: z.number().default(1),
+    })
+    .default(EQUAL_WEIGHTS),
 })
 
 /** Throw unless `value` is a positive safe integer. */
@@ -91,6 +127,8 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     throw new TypeError('allowedExtensions must not be empty')
   }
 
+  const scorecardWeights = resolveScorecardWeights(config.scorecardWeights)
+
   return {
     enabled: config.enabled ?? true,
     maxRows,
@@ -100,5 +138,19 @@ export function resolveConfig(config: Config = {}): ResolvedConfig {
     allowedExtensions,
     workspaceRoot: config.workspaceRoot ?? '',
     storeReports: config.storeReports ?? true,
+    scorecardWeights,
   }
+}
+
+/** Resolve scorecard weights, filling defaults and rejecting non-negative violations loudly. */
+function resolveScorecardWeights(weights: ScorecardWeights = {}): Required<ScorecardWeights> {
+  const out = {} as Required<ScorecardWeights>
+  for (const dimension of SCORECARD_DIMENSIONS) {
+    const value = weights[dimension] ?? 1
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+      throw new TypeError(`scorecardWeights.${dimension} must be a non-negative finite number, got ${String(value)}`)
+    }
+    out[dimension] = value
+  }
+  return out
 }

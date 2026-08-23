@@ -7,6 +7,7 @@
 
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { CleanRule, CleanRunReport, DataQualityService } from '../service.ts'
+import { PROFILE_REPORT_SCHEMA } from './profile-report-schema.ts'
 import { renderCleanText, workspaceOf } from './shared.ts'
 
 const STRING_MAP_SCHEMA = { type: 'json' } as const
@@ -91,12 +92,13 @@ export function defineCleanTool(service: DataQualityService) {
     description: [
       'Apply declarative cleaning rules to a workspace CSV/TSV/JSON/JSONL dataset with deterministic TypeScript computation (no mental math).',
       'Rules apply in array order: dedupe (by column group), fill-missing (constant/mean/median/forward), coerce-type (number/date/boolean; failures counted and set to missing), normalize-unit (e.g. 万/亿 suffixes to base units), trim (whitespace), map-values (enum mapping).',
-      'The source file is NEVER overwritten. Without outputPath the run is preview-only; with outputPath the cleaned dataset is written there (workspace-confined, .csv/.tsv/.json/.jsonl). Returns the per-rule audit log (affected rows per rule) plus a bounded preview. The full report persists to the data_quality storage domain (reportKey).',
+      'The source file is NEVER overwritten. Without outputPath the run is preview-only; with outputPath the cleaned dataset is written there (workspace-confined, .csv/.tsv/.json/.jsonl). Returns the per-rule audit log, the pre-delivery contract summary (with per-column decision trace), and a bounded preview. Pass dryRun: true to skip the write and get the cleaning plan plus the expected contract/diff preview instead. The full report persists to the data_quality storage domain (reportKey).',
     ].join('\n'),
     parameters: {
       path: { type: 'string', required: true, description: 'Workspace-relative dataset path (.csv/.tsv/.json/.jsonl).' },
       rules: { ...CLEAN_RULE_SCHEMA, required: true },
       outputPath: { type: 'string', description: 'Optional workspace-relative output path for the cleaned dataset (must differ from path).' },
+      dryRun: { type: 'boolean', description: 'When true, do not write any output file; return the cleaning plan and expected contract/diff preview instead (default false).' },
     },
     output: {
       schema: {
@@ -105,9 +107,20 @@ export function defineCleanTool(service: DataQualityService) {
           dataset: { type: 'string', required: true },
           inputRows: { type: 'number', required: true },
           outputRows: { type: 'number', required: true },
+          dryRun: { type: 'boolean', required: true },
           generatedAt: { type: 'number', required: true },
           outputPath: { type: 'string' },
           reportKey: { type: 'string' },
+          diffPreview: {
+            type: 'object',
+            properties: {
+              dataset: { type: 'string', required: true },
+              before: { ...PROFILE_REPORT_SCHEMA, required: true },
+              after: { ...PROFILE_REPORT_SCHEMA, required: true },
+              generatedAt: { type: 'number', required: true },
+            },
+            additionalProperties: false,
+          },
           logs: {
             type: 'array',
             items: {
@@ -120,6 +133,67 @@ export function defineCleanTool(service: DataQualityService) {
               },
               additionalProperties: false,
             },
+            required: true,
+          },
+          contract: {
+            type: 'object',
+            properties: {
+              inputRows: { type: 'number', required: true },
+              outputRows: { type: 'number', required: true },
+              removedRows: { type: 'number', required: true },
+              dedupeColumns: { oneOf: [{ type: 'array', items: { type: 'string' } }, { type: 'null' }], required: true },
+              uniqueKeys: { type: 'boolean', required: true },
+              remainingDuplicateRows: { type: 'number', required: true },
+              remainingMissing: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    column: { type: 'string', required: true },
+                    count: { type: 'number', required: true },
+                  },
+                  additionalProperties: false,
+                },
+                required: true,
+              },
+              typeConformance: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    column: { type: 'string', required: true },
+                    to: { type: 'string', enum: ['number', 'date', 'boolean'], required: true },
+                    invalidCount: { type: 'number', required: true },
+                  },
+                  additionalProperties: false,
+                },
+                required: true,
+              },
+              columnDecisions: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    column: { type: 'string', required: true },
+                    decisions: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          strategy: { type: 'string', required: true },
+                          affectedRows: { type: 'number', required: true },
+                        },
+                        additionalProperties: false,
+                      },
+                      required: true,
+                    },
+                  },
+                  additionalProperties: false,
+                },
+                required: true,
+              },
+            },
+            additionalProperties: false,
             required: true,
           },
           preview: {
@@ -141,6 +215,7 @@ export function defineCleanTool(service: DataQualityService) {
         dataset: args.path,
         rules: args.rules as unknown as readonly CleanRule[],
         ...(args.outputPath !== undefined ? { outputPath: args.outputPath } : {}),
+        ...(args.dryRun !== undefined ? { dryRun: args.dryRun } : {}),
         workspace: workspaceOf(exec),
         session: exec.agent?.session,
         signal: exec.signal,

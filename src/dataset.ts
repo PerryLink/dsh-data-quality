@@ -9,6 +9,7 @@
 import { open, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
+import { TextDecoder } from 'node:util'
 import type { JsonValue } from '@deepseek-ai/dsh-session'
 import type { ResolvedConfig } from './config.ts'
 
@@ -18,12 +19,22 @@ export type Cell = JsonValue
 /** One dataset row keyed by column name. */
 export type Row = Record<string, Cell>
 
+/** Detected file encoding metadata (BOM presence + UTF-8 validity). */
+export interface EncodingInfo {
+  /** `'utf-8'` when a UTF-8 byte-order mark was present, else `null`. */
+  readonly bom: 'utf-8' | null
+  /** Whether the bytes decode as valid UTF-8 (no replacement characters forced). */
+  readonly validUtf8: boolean
+}
+
 /** A tabular dataset: ordered columns plus rows. */
 export interface Table {
   /** Column names in file order. */
   readonly columns: string[]
   /** Rows, each carrying every declared column (missing cells are `null`). */
   readonly rows: Row[]
+  /** Detected file encoding; present only for tables loaded from a file. */
+  readonly encoding?: EncodingInfo
 }
 
 /** The root form a document load returns (citation checking walks this). */
@@ -101,13 +112,39 @@ export function throwIfAborted(signal: AbortSignal | undefined): void {
 }
 
 /**
- * Read a dataset file under the size cap.
+ * Detect a UTF-8 byte-order mark and validate the byte sequence. Invalid
+ * UTF-8 is a data-quality finding the profile reports (`validUtf8: false`)
+ * rather than a structural error that blocks the read — the decoded text
+ * keeps U+FFFD replacement characters so the profile can still run.
+ * @param buffer - raw file bytes.
+ * @returns the encoding metadata.
+ */
+export function detectEncoding(buffer: Uint8Array): EncodingInfo {
+  const bom = buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 'utf-8' : null
+  const body = bom === 'utf-8' ? buffer.subarray(3) : buffer
+  let validUtf8 = true
+  try {
+    new TextDecoder('utf-8', { fatal: true }).decode(body)
+  } catch {
+    validUtf8 = false
+  }
+  return { bom, validUtf8 }
+}
+
+/** Decode file bytes, stripping a UTF-8 BOM and preserving replacement characters for invalid bytes. */
+function decodeUtf8Text(buffer: Uint8Array, encoding: EncodingInfo): string {
+  const body = encoding.bom === 'utf-8' ? buffer.subarray(3) : buffer
+  return new TextDecoder('utf-8').decode(body)
+}
+
+/**
+ * Read a dataset file under the size cap, detecting its encoding.
  * @param absolutePath - normalized absolute path (from {@link resolveWorkspacePath}).
  * @param config - resolved config (size cap).
  * @param signal - optional abort signal honored around the read.
- * @returns the UTF-8 text.
+ * @returns the decoded UTF-8 text plus its encoding metadata.
  */
-export async function readDatasetText(absolutePath: string, config: ResolvedConfig, signal?: AbortSignal): Promise<string> {
+export async function readDatasetFile(absolutePath: string, config: ResolvedConfig, signal?: AbortSignal): Promise<{ text: string; encoding: EncodingInfo }> {
   throwIfAborted(signal)
   let info
   try {
@@ -128,7 +165,9 @@ export async function readDatasetText(absolutePath: string, config: ResolvedConf
   const handle = await open(absolutePath, 'r')
   try {
     throwIfAborted(signal)
-    return await handle.readFile('utf8')
+    const buffer = await handle.readFile()
+    const encoding = detectEncoding(buffer)
+    return { text: decodeUtf8Text(buffer, encoding), encoding }
   } finally {
     await handle.close()
   }
@@ -325,12 +364,12 @@ function parseJsonLines(text: string): unknown[] {
  * @returns the parsed table.
  */
 export async function loadTable(absolutePath: string, config: ResolvedConfig, signal?: AbortSignal): Promise<Table> {
-  const text = await readDatasetText(absolutePath, config, signal)
+  const { text, encoding } = await readDatasetFile(absolutePath, config, signal)
   const ext = path.extname(absolutePath).toLowerCase()
   throwIfAborted(signal)
-  if (ext === '.csv') return parseDelimited(text, ',', config, signal)
-  if (ext === '.tsv') return parseDelimited(text, '\t', config, signal)
-  return parseJsonTable(text, ext, config, signal)
+  if (ext === '.csv') return { ...parseDelimited(text, ',', config, signal), encoding }
+  if (ext === '.tsv') return { ...parseDelimited(text, '\t', config, signal), encoding }
+  return { ...parseJsonTable(text, ext, config, signal), encoding }
 }
 
 /**
@@ -345,11 +384,11 @@ export async function loadTable(absolutePath: string, config: ResolvedConfig, si
 export async function loadDocument(absolutePath: string, config: ResolvedConfig, signal?: AbortSignal): Promise<DocumentRoot> {
   const ext = path.extname(absolutePath).toLowerCase()
   if (ext === '.json') {
-    const text = await readDatasetText(absolutePath, config, signal)
+    const { text } = await readDatasetFile(absolutePath, config, signal)
     return { kind: 'json', value: parseJsonDocument(text) }
   }
   if (ext === '.jsonl') {
-    const text = await readDatasetText(absolutePath, config, signal)
+    const { text } = await readDatasetFile(absolutePath, config, signal)
     return { kind: 'json', value: parseJsonLines(text) }
   }
   const table = await loadTable(absolutePath, config, signal)
@@ -405,18 +444,25 @@ const DATE_PATTERNS: readonly RegExp[] = [
   /^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/u,
 ]
 
-/**
- * Deterministic date parse to epoch milliseconds. Accepts `YYYY-MM-DD`,
- * `YYYY/MM/DD`, and ISO-like datetimes (date-only forms read as UTC midnight).
- * Calendar-invalid dates (e.g. 2025-13-40) reject. Returns `undefined` when
- * the cell is not a recognized date.
- * @param cell - the cell to parse (`undefined` when the column is absent).
- * @returns epoch milliseconds, or `undefined`.
- */
-export function parseDate(cell: Cell | undefined): number | undefined {
+/** Deterministic date-format labels in {@link DATE_PATTERNS} order. */
+const DATE_FORMATS = ['iso-date', 'slash-date', 'datetime'] as const
+
+/** The format label of a recognized date cell (source pattern, not the epoch). */
+export type DateFormat = (typeof DATE_FORMATS)[number]
+
+/** A recognized date cell: its parsed epoch plus the source format label. */
+export interface DateParse {
+  /** Epoch milliseconds (UTC). */
+  readonly epoch: number
+  /** Which {@link DATE_PATTERNS} entry matched. */
+  readonly format: DateFormat
+}
+
+/** Parse one date cell to its epoch plus format; `undefined` when unrecognized. */
+function parseDateCellInternal(cell: Cell | undefined): DateParse | undefined {
   if (typeof cell !== 'string') return undefined
   const text = cell.trim()
-  for (const pattern of DATE_PATTERNS) {
+  for (const [index, pattern] of DATE_PATTERNS.entries()) {
     const match = pattern.exec(text)
     if (match === null) continue
     const year = Number(match[1])
@@ -429,9 +475,43 @@ export function parseDate(cell: Cell | undefined): number | undefined {
     const epoch = Date.UTC(year, month - 1, day, hour, minute, second)
     const check = new Date(epoch)
     if (check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return undefined
-    return epoch
+    const format = DATE_FORMATS[index]
+    if (format === undefined) return undefined
+    return { epoch, format }
   }
   return undefined
+}
+
+/**
+ * Deterministic date parse to epoch milliseconds. Accepts `YYYY-MM-DD`,
+ * `YYYY/MM/DD`, and ISO-like datetimes (date-only forms read as UTC midnight).
+ * Calendar-invalid dates (e.g. 2025-13-40) reject. Returns `undefined` when
+ * the cell is not a recognized date.
+ * @param cell - the cell to parse (`undefined` when the column is absent).
+ * @returns epoch milliseconds, or `undefined`.
+ */
+export function parseDate(cell: Cell | undefined): number | undefined {
+  return parseDateCellInternal(cell)?.epoch
+}
+
+/**
+ * Parse one date cell to its epoch plus source format label.
+ * @param cell - the cell to parse (`undefined` when the column is absent).
+ * @returns the parsed date, or `undefined` when the cell is not a recognized date.
+ */
+export function parseDateCell(cell: Cell | undefined): DateParse | undefined {
+  return parseDateCellInternal(cell)
+}
+
+/**
+ * The format label of a recognized date cell (`iso-date` / `slash-date` /
+ * `datetime`); `undefined` when the cell is not a recognized date. Used to
+ * measure a date column's format consistency.
+ * @param cell - the cell to inspect (`undefined` when the column is absent).
+ * @returns the source format label, or `undefined`.
+ */
+export function dateFormatOf(cell: Cell | undefined): DateFormat | undefined {
+  return parseDateCellInternal(cell)?.format
 }
 
 /** Boolean parse: true/false/yes/no/1/0, case-insensitive. */

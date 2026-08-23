@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { countDuplicateRows, numericProfile, profileTable, renderProfileText } from '../src/profile.ts'
+import { countDuplicateRows, detectDuplicateRows, numericProfile, profileTable, renderProfileText } from '../src/profile.ts'
 import { parseDelimited } from '../src/dataset.ts'
 import { resolveConfig } from '../src/config.ts'
 import { DIRTY_CSV } from './harness.ts'
@@ -39,6 +39,30 @@ describe('countDuplicateRows', () => {
   })
 })
 
+describe('detectDuplicateRows', () => {
+  it('reports the duplicate rate and 0-based sample indexes, capped by the limit', () => {
+    const table = parseDelimited('a,b\n1,x\n1,x\n2,y\n1,x\n', ',', config)
+    const detection = detectDuplicateRows(table, { sampleLimit: 1 })
+    expect(detection.duplicateRows).toBe(2)
+    expect(detection.duplicateRate).toBeCloseTo(0.5, 5)
+    expect(detection.duplicateSampleRowIndexes).toEqual([1])
+  })
+
+  it('uses the full-row sha256 content key (column order matters)', () => {
+    const sameContent = parseDelimited('a,b\n1,x\n1,x\n', ',', config)
+    expect(detectDuplicateRows(sameContent, { sampleLimit: 10 }).duplicateRows).toBe(1)
+    // Different cell content in the same columns is not a duplicate.
+    const differentContent = parseDelimited('a,b\n1,x\n2,y\n', ',', config)
+    expect(detectDuplicateRows(differentContent, { sampleLimit: 10 }).duplicateRows).toBe(0)
+  })
+
+  it('is deterministic and rejects an invalid sample limit', () => {
+    const table = parseDelimited('a\n1\n1\n1\n', ',', config)
+    expect(detectDuplicateRows(table, { sampleLimit: 5 })).toEqual(detectDuplicateRows(table, { sampleLimit: 5 }))
+    expect(() => detectDuplicateRows(table, { sampleLimit: 0 })).toThrowError(/sampleLimit/)
+  })
+})
+
 describe('profileTable', () => {
   it('infers column types and flags suspicions', () => {
     const report = profileTable(dirtyTable(), { dataset: 'dirty.csv', generatedAt: GENERATED_AT })
@@ -46,6 +70,16 @@ describe('profileTable', () => {
     expect(report.columnCount).toBe(6)
     expect(report.sampled).toBe(false)
     expect(report.duplicateRows).toBe(1)
+    expect(report.duplicateRate).toBeCloseTo(0.1, 5)
+    expect(report.duplicateSampleRowIndexes).toEqual([8])
+    expect(report.scorecard.dimensions.map((dimension) => dimension.name)).toEqual([
+      'completeness',
+      'uniqueness',
+      'validity',
+      'consistency',
+      'timeliness',
+      'accuracy',
+    ])
 
     const byName = new Map(report.columns.map((column) => [column.name, column]))
     expect(byName.get('nav')?.inferredType).toBe('mixed')
@@ -63,8 +97,12 @@ describe('profileTable', () => {
     const report = profileTable(table, { dataset: 'x.csv', generatedAt: GENERATED_AT })
     const column = report.columns[0]
     expect(column?.inferredType).toBe('number')
+    expect(column?.numeric?.count).toBe(4)
+    expect(column?.numeric?.distinct).toBe(4)
     expect(column?.numeric?.min).toBe(1)
     expect(column?.numeric?.max).toBe(4)
+    expect(column?.numeric?.p25).toBe(1.75)
+    expect(column?.numeric?.p75).toBe(3.25)
     expect(column?.numeric?.mean).toBe(2.5)
   })
 

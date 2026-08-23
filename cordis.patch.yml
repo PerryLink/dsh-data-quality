@@ -44,3 +44,14 @@
         # Persist profile/clean/verify reports to the `data_quality` storage
         # domain (durable, queryable). Keys are returned as `reportKey`.
         storeReports: true
+        # Per-dimension weights for the scorecard's weighted overall total
+        # (completeness/uniqueness/validity/consistency/timeliness/accuracy).
+        # Each weight must be a non-negative number; omit a dimension for the
+        # equal-weight default of 1.
+        scorecardWeights:
+          completeness: 1
+          uniqueness: 1
+          validity: 1
+          consistency: 1
+          timeliness: 1
+          accuracy: 1

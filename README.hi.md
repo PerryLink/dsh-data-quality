@@ -77,6 +77,7 @@ dsh plugin --profile web remove dsh-data-quality   # अनइंस्टॉल
 | `allowedExtensions` | `['.csv', '.tsv', '.json', '.jsonl']` | डेटासेट के रूप में स्वीकृत एक्सटेंशन। |
 | `workspaceRoot` | `""` | SERVICE-स्तरीय कॉल (जैसे `verifyCitations`) के लिए निरपेक्ष रूट जिनके पास सत्र वर्कस्पेस नहीं है; रिक्त = harness प्रक्रिया का आरंभ निर्देशिका। टूल कॉल हमेशा सत्र वर्कस्पेस cwd उपयोग करती हैं। |
 | `storeReports` | `true` | रन रिपोर्ट `data_quality` स्टोरेज डोमेन में सहेजें और `reportKey` लौटाएँ। |
+| `scorecardWeights` | सभी 1 (बराबर) | स्कोरकार्ड के भारित कुल के लिए प्रति-आयाम भार (completeness/uniqueness/validity/consistency/timeliness/accuracy); हर भार एक गैर-ऋणात्मक संख्या होना चाहिए। |
 
 ## Tools & surfaces
 

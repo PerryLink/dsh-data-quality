@@ -20,6 +20,7 @@ describe('resolveConfig', () => {
       allowedExtensions: ['.csv', '.tsv', '.json', '.jsonl'],
       workspaceRoot: '',
       storeReports: true,
+      scorecardWeights: { completeness: 1, uniqueness: 1, validity: 1, consistency: 1, timeliness: 1, accuracy: 1 },
     })
   })
 
@@ -60,6 +61,14 @@ describe('resolveConfig', () => {
     expect(() => resolveConfig({ allowedExtensions: ['..csv'] })).toThrowError(/dot-prefixed lowercase/)
     expect(() => resolveConfig({ allowedExtensions: ['.csv', 'xlsx'] })).toThrowError(/dot-prefixed lowercase/)
   })
+
+  it('resolves scorecard weights with equal defaults and rejects non-negative violations', () => {
+    expect(resolveConfig().scorecardWeights).toEqual({ completeness: 1, uniqueness: 1, validity: 1, consistency: 1, timeliness: 1, accuracy: 1 })
+    expect(resolveConfig({ scorecardWeights: { completeness: 2 } }).scorecardWeights.completeness).toBe(2)
+    expect(resolveConfig({ scorecardWeights: { completeness: 0 } }).scorecardWeights.completeness).toBe(0)
+    expect(() => resolveConfig({ scorecardWeights: { accuracy: -1 } })).toThrowError(/scorecardWeights\.accuracy/)
+    expect(() => resolveConfig({ scorecardWeights: { validity: Number.NaN } })).toThrowError(/scorecardWeights\.validity/)
+  })
 })
 
 describe('Config schema', () => {
@@ -68,6 +77,7 @@ describe('Config schema', () => {
     expect(resolved.maxRows).toBe(200_000)
     expect(resolved.allowedExtensions).toEqual(['.csv', '.tsv', '.json', '.jsonl'])
     expect(resolved.storeReports).toBe(true)
+    expect(resolved.scorecardWeights?.completeness).toBe(1)
   })
 
   it('rejects wrong-typed values loudly', () => {

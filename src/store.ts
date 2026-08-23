@@ -12,7 +12,7 @@ import { pathFingerprint } from './dataset.ts'
 
 /** Zod schema of one persisted report record (durable-boundary validation). */
 export const reportRecordSchema = z.object({
-  kind: z.enum(['profile', 'clean', 'verify', 'citations']),
+  kind: z.enum(['profile', 'clean', 'verify', 'citations', 'clean-diff']),
   at: z.number().int().nonnegative(),
   dataset: z.string(),
   report: z.record(z.string(), z.unknown()),
@@ -20,13 +20,19 @@ export const reportRecordSchema = z.object({
 
 /** One persisted report record. */
 export interface ReportRecord {
-  readonly kind: 'profile' | 'clean' | 'verify' | 'citations'
+  readonly kind: 'profile' | 'clean' | 'verify' | 'citations' | 'clean-diff'
   /** Injected run timestamp (epoch ms). */
   readonly at: number
   /** Workspace-relative dataset path as the caller gave it. */
   readonly dataset: string
   /** The full run report (profile/clean/verify/citations shape by `kind`). */
   readonly report: Record<string, unknown>
+}
+
+/** A persisted report plus its storage key (the query surface's return value). */
+export interface StoredReport extends ReportRecord {
+  /** The storage key the record was written under. */
+  readonly key: string
 }
 
 /** The `dsh-data-quality` storage-domain declaration. */
@@ -52,6 +58,26 @@ export interface ReportStore {
    * @returns the record, or `undefined` when absent.
    */
   get(key: string): ReportRecord | undefined
+  /**
+   * Snapshot of every record of one kind, ordered by key (chronological).
+   * @param kind - the report kind.
+   * @returns the stored reports (empty when none match).
+   */
+  list(kind: ReportRecord['kind']): StoredReport[]
+}
+
+/** Well-formed report-key shape: `<17-digit timestamp>-<kind>-<8-hex fingerprint>`. */
+const REPORT_KEY_PATTERN = /^\d{17}-(?:profile|clean|verify|citations|clean-diff)-[0-9a-f]{8}$/u
+
+/**
+ * Whether `key` is a well-formed, path-safe storage report key. Rejects any
+ * key with separators, traversal, or unexpected characters before it can be
+ * handed to the storage backend.
+ * @param key - candidate report key.
+ * @returns whether the key matches the deterministic report-key format.
+ */
+export function isValidReportKey(key: string): boolean {
+  return REPORT_KEY_PATTERN.test(key)
 }
 
 /** Pad to two digits for the key timestamp. */

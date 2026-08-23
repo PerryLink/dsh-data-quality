@@ -41,6 +41,45 @@ export class VerifyRuleError extends Error {
   }
 }
 
+/** The metrics a verification expectation can reconcile. */
+export type VerifyMetric = 'rowCount' | 'columnSum' | 'columnMean' | 'uniqueCount' | 'nullCount'
+
+/** One metric expectation: an expected value plus an optional relative tolerance. */
+export interface VerifyExpectation {
+  readonly metric: VerifyMetric
+  /** Required for every metric except `rowCount`. */
+  readonly column?: string
+  readonly expected: number
+  /** Optional relative tolerance in [0, 1]; falls back to the configured `defaultTolerance`. */
+  readonly tolerance?: number
+}
+
+/** One expectation's reconciliation outcome. */
+export interface VerifyExpectationResult {
+  readonly metric: VerifyMetric
+  /** Absent for `rowCount`. */
+  readonly column?: string
+  readonly expected: number
+  readonly actual: number
+  readonly tolerance: number
+  readonly passed: boolean
+}
+
+/** Raised for invalid expectations; `message` names the expectation index and reason. */
+export class VerifyExpectationError extends Error {
+  /**
+   * @param expectationIndex - index of the offending expectation in the request array.
+   * @param message - actionable human-readable detail.
+   */
+  constructor(
+    readonly expectationIndex: number,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'VerifyExpectationError'
+  }
+}
+
 /** One failing row's evidence (capped per rule by `evidenceRowLimit`). */
 export interface VerifyEvidenceRow {
   /** 0-based data row index. */
@@ -68,6 +107,8 @@ export interface VerifyReport {
   readonly passed: boolean
   readonly rowCount: number
   readonly rules: VerifyRuleResult[]
+  /** Metric-reconciliation outcomes (empty when no expectations were given). */
+  readonly expectations: VerifyExpectationResult[]
   /** Storage-domain key of the persisted report, when persistence is on (set by the provider). */
   readonly reportKey?: string
   /** Injected generation timestamp (epoch ms). */
@@ -123,19 +164,118 @@ function evaluate(
 
 const CROSS_OPS = ['<', '<=', '==', '!=', '>=', '>'] as const
 
+/** The metric ids, for validation and diagnostics. */
+const VERIFY_METRICS = ['rowCount', 'columnSum', 'columnMean', 'uniqueCount', 'nullCount'] as const
+
+/** Throw unless the expectation is well-formed (metric/column/tolerance). */
+function validateExpectation(table: Table, expectation: VerifyExpectation, index: number): void {
+  if (!VERIFY_METRICS.includes(expectation.metric)) {
+    throw new VerifyExpectationError(index, `expectation ${index}: unknown metric ${JSON.stringify(expectation.metric)} (expected one of ${VERIFY_METRICS.join(', ')})`)
+  }
+  if (expectation.metric !== 'rowCount') {
+    if (expectation.column === undefined || expectation.column === '') {
+      throw new VerifyExpectationError(index, `expectation ${index}: metric ${expectation.metric} requires a column`)
+    }
+    if (!table.columns.includes(expectation.column)) {
+      throw new VerifyExpectationError(index, `expectation ${index}: unknown column ${JSON.stringify(expectation.column)} (columns: ${table.columns.join(', ')})`)
+    }
+  } else if (expectation.column !== undefined) {
+    throw new VerifyExpectationError(index, `expectation ${index}: metric rowCount takes no column, got ${JSON.stringify(expectation.column)}`)
+  }
+  if (expectation.tolerance !== undefined && (typeof expectation.tolerance !== 'number' || !Number.isFinite(expectation.tolerance) || expectation.tolerance < 0 || expectation.tolerance > 1)) {
+    throw new VerifyExpectationError(index, `expectation ${index}: tolerance must be a finite number in [0, 1], got ${String(expectation.tolerance)}`)
+  }
+}
+
+/** Compute the deterministic actual value of one expectation's metric. */
+function metricValueOf(table: Table, expectation: VerifyExpectation): number {
+  switch (expectation.metric) {
+    case 'rowCount':
+      return table.rows.length
+    case 'nullCount': {
+      let count = 0
+      for (const row of table.rows) {
+        if (isMissing(row[expectation.column as string])) count += 1
+      }
+      return count
+    }
+    case 'uniqueCount': {
+      const distinct = new Set<string>()
+      for (const row of table.rows) {
+        const cell = row[expectation.column as string]
+        if (isMissing(cell)) continue
+        distinct.add(typeof cell === 'string' ? cell : JSON.stringify(cell))
+      }
+      return distinct.size
+    }
+    case 'columnSum':
+    case 'columnMean': {
+      let sum = 0
+      let count = 0
+      for (const row of table.rows) {
+        const value = parseNumeric(row[expectation.column as string])
+        if (value === undefined) continue
+        sum += value
+        count += 1
+      }
+      return expectation.metric === 'columnSum' ? sum : count === 0 ? 0 : sum / count
+    }
+  }
+}
+
+/**
+ * Reconcile each expectation against its deterministic actual value. A
+ * mismatch is a normal `passed: false` result, never a thrown error; invalid
+ * metrics, columns, and tolerances fail loud.
+ * @param table - the parsed dataset.
+ * @param expectations - the expectations to reconcile.
+ * @param defaultTolerance - configured fallback relative tolerance.
+ * @param signal - optional abort signal.
+ * @returns one outcome per expectation.
+ */
+export function verifyExpectations(
+  table: Table,
+  expectations: readonly VerifyExpectation[],
+  defaultTolerance: number,
+  signal?: AbortSignal,
+): VerifyExpectationResult[] {
+  return expectations.map((expectation, index) => {
+    throwIfAborted(signal)
+    validateExpectation(table, expectation, index)
+    const actual = metricValueOf(table, expectation)
+    const tolerance = expectation.tolerance ?? defaultTolerance
+    const passed = numericClose(actual, expectation.expected, tolerance)
+    return {
+      metric: expectation.metric,
+      ...(expectation.column !== undefined ? { column: expectation.column } : {}),
+      expected: expectation.expected,
+      actual,
+      tolerance,
+      passed,
+    }
+  })
+}
+
 /**
  * Apply verification rules over a parsed table. A missing cell fails every
- * rule that reads it. The overall `passed` is the conjunction of rule passes;
- * a failing dataset is a normal result, never a thrown error.
+ * rule that reads it. The overall `passed` is the conjunction of rule passes
+ * and expectation passes; a failing dataset is a normal result, never a
+ * thrown error.
  * @param table - the parsed dataset.
  * @param rules - non-empty rule list.
- * @param options - evidence cap, injected clock for `freshness`, abort signal.
+ * @param options - evidence cap, injected clock for `freshness`, optional expectations, default tolerance, abort signal.
  * @returns the verify report (without the dataset label; the caller adds it).
  */
 export function verifyTable(
   table: Table,
   rules: readonly VerifyRule[],
-  options: { evidenceRowLimit: number; now: () => number; signal?: AbortSignal | undefined },
+  options: {
+    evidenceRowLimit: number
+    now: () => number
+    signal?: AbortSignal | undefined
+    expectations?: readonly VerifyExpectation[] | undefined
+    defaultTolerance?: number | undefined
+  },
 ): Omit<VerifyReport, 'dataset'> {
   if (rules.length === 0) {
     throw new VerifyRuleError(0, 'rules must be a non-empty array')
@@ -332,10 +472,12 @@ export function verifyTable(
     }
     results.push(result)
   }
+  const expectations = verifyExpectations(table, options.expectations ?? [], options.defaultTolerance ?? 1e-9, options.signal)
   return {
-    passed: results.every((result) => result.passed),
+    passed: results.every((result) => result.passed) && expectations.every((expectation) => expectation.passed),
     rowCount: table.rows.length,
     rules: results,
+    expectations,
     generatedAt: options.now(),
   }
 }
@@ -353,6 +495,10 @@ export function renderVerifyText(report: VerifyReport): string {
     if (rule.failedCount > rule.evidence.length) {
       lines.push(`    … and ${rule.failedCount - rule.evidence.length} more failing row(s)`)
     }
+  }
+  for (const expectation of report.expectations) {
+    const target = expectation.column !== undefined ? `${expectation.metric}(${expectation.column})` : expectation.metric
+    lines.push(`- [${expectation.passed ? 'pass' : 'FAIL'}] expectation ${target}: actual ${expectation.actual} vs expected ${expectation.expected} (tolerance ${expectation.tolerance})`)
   }
   return lines.join('\n')
 }

@@ -77,6 +77,7 @@ Todas as chaves são opcionais (valores padrão mostrados); valores inválidos f
 | `allowedExtensions` | `['.csv', '.tsv', '.json', '.jsonl']` | Extensões aceitas como datasets. |
 | `workspaceRoot` | `""` | Raiz absoluta para chamadas de nível de SERVIÇO (p. ex. `verifyCitations`) sem workspace de sessão; vazio = diretório de arranque do processo do harness. Ferramentas sempre usam o cwd do workspace da sessão. |
 | `storeReports` | `true` | Persistir relatórios no domínio de armazenamento `data_quality` e retornar `reportKey`. |
+| `scorecardWeights` | todo 1 (igual) | Pesos por dimensão (completeness/uniqueness/validity/consistency/timeliness/accuracy) para o total ponderado do scorecard; cada peso deve ser um número não negativo. |
 
 ## Tools & surfaces
 

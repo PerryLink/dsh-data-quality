@@ -5,6 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- DAMA six-dimension quality scorecard in `data_profile`: completeness, uniqueness, validity, consistency, timeliness, and accuracy (limited declared-schema definition; accuracy is reported undetermined without a declared schema rather than fabricated). The scorecard flows through the profile report, the persisted storage-domain record, and the tool result.
+- Full-row sha256 content-hash duplicate detection in `data_profile`, reporting the duplicate rate plus a bounded sample of 0-based duplicate row indexes (capped by `evidenceRowLimit`).
+- Pre-delivery contract validation summary on `data_clean` (dedupe before/after row comparison, uniqueness regression, non-null and type regressions) plus a persisted clean before/after profile diff report under the new `clean-diff` storage record kind.
+- `data_report` tool plus `ctx.dataQuality.getReport`/`listReports` query methods to read persisted reports back by `reportKey` (path-safe validation, missing records fail loud) or by `kind`, ordered chronologically.
+- `data_clean` `dryRun` parameter: no file written and no report persisted, returning the per-column cleaning plan (in `contract.columnDecisions`) plus the expected `contract`/`diffPreview`.
+- Numeric distribution `count`/`distinct` fields on numeric column profiles.
+- Config `scorecardWeights` (six per-dimension weights, non-negative, equal by default) driving a `weightedOverall` scorecard total.
+- Per-column decision trace in the clean contract (`columnDecisions`: strategy + affected rows), persisted with the clean report.
+- File-encoding reporting in `data_profile` (`encoding`: UTF-8 BOM presence and validity; invalid UTF-8 is reported, not fatal).
+- Built-in industry profile presets (`retail`, `saas`, `fund`, `real-estate`, `e-commerce`, `healthcare`, `logistics`, `manufacturing`, `energy`) via the `data_profile` `industryPreset` parameter, feeding the scorecard `accuracy` dimension; unknown ids fail loud.
+- Metric reconciliation on `data_verify`: optional `expectations` (rowCount/columnSum/columnMean/uniqueCount/nullCount, each with `column`, `expected`, optional relative `tolerance`) reconcile deterministic computed values; a mismatch is a normal `passed: false` verdict with actual/expected/tolerance detail, while invalid metrics, columns, and out-of-range tolerances fail loud. Results flow into the verify report and its persisted record.
+
+### Deviations
+
+Documented, deliberate non-goals for this repository (recorded rather than silently omitted):
+
+- **Native xlsx** — a real Excel parser needs a new dependency (or a sidecar); this repo keeps a zero-dependency parsing contract, so CSV/TSV/JSON/JSONL are the supported dataset formats, now with UTF-8/BOM encoding detection.
+- **SQL / DuckDB access** — database drivers are out of scope for the zero-dependency, in-process TypeScript seam; tabular datasets are files.
+- **`qsv` as an alternative parser** — an external binary violates the no-external-processes contract.
+- **Slot client report panel** — a browser report panel needs a client half and bundle changes; the consumption path is covered by the `data_report` tool plus storage-domain persistence instead.
+- **Computer-use fallback collection** — macOS-only and brittle; the regular filesystem capability already covers the supported collection path.
+
 ## [0.1.3] - 2026-08-23
 
 ### Changed

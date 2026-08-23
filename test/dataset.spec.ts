@@ -11,10 +11,13 @@ import path from 'node:path'
 import { resolveConfig } from '../src/config.ts'
 import {
   DatasetError,
+  dateFormatOf,
+  detectEncoding,
   isMissing,
   loadTable,
   parseBoolean,
   parseDate,
+  parseDateCell,
   parseDelimited,
   parseJsonTable,
   parseNumeric,
@@ -130,6 +133,28 @@ describe('loadTable guards', () => {
   it('rejects missing files as not-found', async () => {
     await expect(loadTable(path.join(tmpdir(), 'dq-no-such-file.csv'), config)).rejects.toThrowError(/not found/)
   })
+
+  it('loadTable reports encoding (BOM stripped + UTF-8 validity)', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'dq-dataset-'))
+    try {
+      const file = path.join(dir, 'bom.csv')
+      await writeFile(file, '\uFEFFa,b\n1,2\n', 'utf8')
+      const table = await loadTable(file, config)
+      expect(table.encoding).toEqual({ bom: 'utf-8', validUtf8: true })
+      expect(table.columns).toEqual(['a', 'b'])
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('detectEncoding', () => {
+  it('detects a UTF-8 BOM and flags invalid UTF-8 bytes', () => {
+    expect(detectEncoding(new TextEncoder().encode('a,b\n1,2\n'))).toEqual({ bom: null, validUtf8: true })
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf, ...new TextEncoder().encode('a,b\n1,2\n')])
+    expect(detectEncoding(bom)).toEqual({ bom: 'utf-8', validUtf8: true })
+    expect(detectEncoding(new Uint8Array([0xff, 0xfe, 0x00, 0x00]))).toEqual({ bom: null, validUtf8: false })
+  })
 })
 
 describe('sampleRows', () => {
@@ -184,5 +209,14 @@ describe('scalar parsers', () => {
     expect(parseBoolean('0')).toBe(false)
     expect(parseBoolean(true)).toBe(true)
     expect(parseBoolean('maybe')).toBeUndefined()
+  })
+
+  it('parseDateCell reports the source format label', () => {
+    expect(parseDateCell('2026-08-01')).toEqual({ epoch: Date.UTC(2026, 7, 1), format: 'iso-date' })
+    expect(parseDateCell('2026/8/2')).toEqual({ epoch: Date.UTC(2026, 7, 2), format: 'slash-date' })
+    expect(parseDateCell('2026-08-01T10:30:00Z')?.format).toBe('datetime')
+    expect(dateFormatOf('2026-08-01')).toBe('iso-date')
+    expect(dateFormatOf('2026/8/2')).toBe('slash-date')
+    expect(dateFormatOf('nope')).toBeUndefined()
   })
 })

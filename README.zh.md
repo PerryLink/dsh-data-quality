@@ -77,6 +77,7 @@ dsh plugin --profile web remove dsh-data-quality   # 卸载
 | `allowedExtensions` | `['.csv', '.tsv', '.json', '.jsonl']` | 可作为数据集的扩展名。 |
 | `workspaceRoot` | `""` | 服务级调用（如 `verifyCitations`）无会话工作区时使用的绝对根；空 = harness 进程启动目录。工具调用始终使用会话工作区 cwd。 |
 | `storeReports` | `true` | 把运行报告写入 `data_quality` storage domain 并返回 `reportKey`。 |
+| `scorecardWeights` | 全为 1（等权） | 六维加权总分的各维度权重（completeness/uniqueness/validity/consistency/timeliness/accuracy）；每个权重必须是非负数。 |
 
 ## Tools & surfaces
 
