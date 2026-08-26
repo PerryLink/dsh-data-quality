@@ -7,6 +7,8 @@
 
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { JsonValue } from '@deepseek-ai/dsh-session'
+import type { ProfileReport } from '../profile.ts'
+import { renderCleanHtml, renderProfileHtml, type CleanReportHtml } from '../report-html.ts'
 import type { DataQualityService } from '../service.ts'
 import type { ReportRecord, StoredReport } from '../store.ts'
 
@@ -27,6 +29,19 @@ interface DataReportValue {
   readonly key?: string
   readonly kind?: ReportRecord['kind']
   readonly records: ReportView[]
+  /** Self-contained offline HTML (present only when `format: html`). */
+  readonly html?: string
+}
+
+/** Render one stored report as a self-contained HTML document (profile/clean only). */
+function renderRecordHtml(record: StoredReport): string {
+  if (record.kind === 'profile') {
+    return renderProfileHtml(record.report as unknown as ProfileReport)
+  }
+  if (record.kind === 'clean' || record.kind === 'clean-diff') {
+    return renderCleanHtml(record.report as unknown as CleanReportHtml, record.dataset)
+  }
+  throw new Error(`data_report html format does not support kind "${record.kind}" (profile/clean only)`)
 }
 
 /** Project a stored report into the canonical value (the stored report is already lossless JSON). */
@@ -64,6 +79,7 @@ export function defineReportTool(service: DataQualityService) {
     parameters: {
       key: { type: 'string', description: 'Exact storage reportKey (e.g. 20260819000000000-profile-1a2b3c4d); fetches that one report.' },
       kind: { type: 'string', enum: [...REPORT_KINDS], description: 'Report kind to list (profile/clean/clean-diff/verify/citations).' },
+      format: { type: 'string', enum: ['json', 'html'], description: 'Output format. json (default) returns the report envelope(s); html renders one report as a self-contained offline HTML document (requires key; profile/clean only).' },
     },
     output: {
       schema: {
@@ -86,10 +102,15 @@ export function defineReportTool(service: DataQualityService) {
             },
             required: true,
           },
+          html: { type: 'string', description: 'Self-contained offline HTML (present only when format: html).' },
         },
         additionalProperties: false,
       },
-      render: (_args, value) => [{ type: 'text', text: renderReportText(value as unknown as DataReportValue) }],
+      render: (_args, value) => {
+        const view = value as unknown as DataReportValue
+        if (view.html !== undefined) return [{ type: 'text', text: view.html }]
+        return [{ type: 'text', text: renderReportText(view) }]
+      },
     },
     async execute(args, _exec): Promise<DataReportValue> {
       const hasKey = args.key !== undefined
@@ -97,9 +118,17 @@ export function defineReportTool(service: DataQualityService) {
       if (hasKey === hasKind) {
         throw new Error('data_report needs exactly one of key/kind')
       }
+      const format = (args.format ?? 'json') as 'json' | 'html'
       if (hasKey) {
         const record = await service.getReport(args.key as string)
-        return { key: args.key as string, records: [toView(record)] }
+        return {
+          key: args.key as string,
+          records: [toView(record)],
+          ...(format === 'html' ? { html: renderRecordHtml(record) } : {}),
+        }
+      }
+      if (format === 'html') {
+        throw new Error('data_report html format requires key (exactly one report)')
       }
       const records = await service.listReports(args.kind as ReportRecord['kind'])
       return { kind: args.kind as ReportRecord['kind'], records: records.map(toView) }

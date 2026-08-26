@@ -51,6 +51,7 @@ export const COLUMN_PROFILE_SCHEMA = {
 export const PROFILE_REPORT_SCHEMA = {
   type: 'object',
   properties: {
+    schemaVersion: { type: 'number', required: true },
     dataset: { type: 'string', required: true },
     rowCount: { type: 'number', required: true },
     sampled: { type: 'boolean', required: true },

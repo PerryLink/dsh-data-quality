@@ -80,6 +80,8 @@ export {
 export { dataQualityDomainSpec, reportKeyOf, reportRecordSchema, isValidReportKey, type ReportRecord, type ReportStore, type StoredReport } from './store.ts'
 export { DATA_QUALITY_EVENT_TYPES, appendDataQualityEvent, type DataQualityEventData, type DataQualityEventType } from './events.ts'
 export { MAX_CELL_TEXT, truncateCell, truncateRow } from './present.ts'
+export { renderProfileHtml, renderCleanHtml, type CleanReportHtml } from './report-html.ts'
+export { REPORT_SCHEMA_VERSION } from './version.ts'
 
 /**
  * Mount the seam: resolve config (fail loud), open the report domain, publish

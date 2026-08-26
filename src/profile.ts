@@ -9,6 +9,7 @@
 import { createHash } from 'node:crypto'
 import { isMissing, parseBoolean, parseDate, parseNumeric, sampleRows, throwIfAborted, type EncodingInfo, type Row, type Table } from './dataset.ts'
 import { computeScorecard, type DataQualityScorecard, type ScorecardDimensionName } from './scorecard.ts'
+import { REPORT_SCHEMA_VERSION } from './version.ts'
 
 /** Inferred column type from parsed cell classes. */
 export type InferredType = 'number' | 'date' | 'boolean' | 'string' | 'empty' | 'mixed'
@@ -59,6 +60,8 @@ export interface DuplicateDetection {
 
 /** The full profile report (also the persisted and tool-returned value). */
 export interface ProfileReport {
+  /** The persisted-report schema version (see {@link REPORT_SCHEMA_VERSION}). */
+  readonly schemaVersion: number
   readonly dataset: string
   readonly rowCount: number
   /** Whether column cards describe a systematic sample rather than every row. */
@@ -286,6 +289,7 @@ export function profileTable(
     signal: options.signal,
   })
   return {
+    schemaVersion: REPORT_SCHEMA_VERSION,
     dataset: options.dataset,
     rowCount: table.rows.length,
     sampled: profiled.length !== table.rows.length,

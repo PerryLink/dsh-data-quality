@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Self-contained offline HTML report.** `data_report` gains `format: html` (with `key`): a profile or clean report renders as a single `.html` file with inlined CSS/JS, no external requests (no CDN, `<link>`, or `<script src>`), the DAMA six-dimension scorecard, the per-column profile summary table, and the per-rule cleaning summary table. Dataset values are HTML-escaped before reaching the markup.
+- **Versioned report schema.** The profile report now carries `schemaVersion` (a new `REPORT_SCHEMA_VERSION = 1`), declared in the profile report's JSON schema so future consumers can detect an incompatible persisted record instead of misreading it.
+
 ## [0.2.0] - 2026-08-23
 
 ### Added
