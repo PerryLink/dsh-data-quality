@@ -1,4 +1,5 @@
 # dsh-data-quality
+- **Canal 1024 store**: `npm i -g dsh1024` uma vez, depois `dsh1024 plugin --profile web add dsh-data-quality` (conta para o ranking de instalações do [deepseek1024.com](https://deepseek1024.com)).
 
 **Perfilamento, limpeza e verificação de dados determinísticos para DeepSeek Harness.**
 

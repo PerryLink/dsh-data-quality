@@ -1,4 +1,5 @@
 # dsh-data-quality
+- **1024 商店渠道**：先 `npm i -g dsh1024`，再 `dsh1024 plugin --profile web add dsh-data-quality`（计入 [deepseek1024.com](https://deepseek1024.com) 安装排行）。
 
 **DeepSeek Harness 的确定性数据梳理、清洗与核查插件。**
 
