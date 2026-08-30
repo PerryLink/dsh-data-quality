@@ -82,11 +82,11 @@ dsh plugin --profile web remove dsh-data-quality   # 卸载
 
 ## Tools & surfaces
 
-### `data_profile({ path, sample? })`
+### `data_profile({ path, sample?, industryPreset? })`
 
-梳理工作区数据集。`path` 为工作区相对路径（`.csv`/`.tsv`/`.json`/`.jsonl`；JSON 必须是扁平对象数组）。`sample` 按每 `ceil(N/sample)` 行取样计算列卡片（确定性；行数仍精确）。返回结构化报告，并渲染人类可读的逐列摘要。
+梳理工作区数据集。`path` 为工作区相对路径（`.csv`/`.tsv`/`.json`/`.jsonl`；JSON 必须是扁平对象数组）。`sample` 按每 `ceil(N/sample)` 行取样计算列卡片（确定性；行数仍精确）。`industryPreset`（`retail`/`saas`/`fund`/`real-estate`/`e-commerce`/`healthcare`/`logistics`/`manufacturing`/`energy`）注入该行业预期列，使计分卡 `accuracy` 维度可判定；未知 id 响亮失败。返回结构化报告，并渲染人类可读的逐列摘要。
 
-### `data_clean({ path, rules, outputPath? })`
+### `data_clean({ path, rules, outputPath?, dryRun? })`
 
 按数组顺序应用 `rules`，每条规则看到上一条的输出。规则参考：
 
@@ -99,9 +99,13 @@ dsh plugin --profile web remove dsh-data-quality   # 卸载
 | `trim` | `columns?` | 去除字符串单元格首尾空白（省略时为全部列）。 |
 | `map-values` | `column`, `map`, `else?` | 精确匹配映射；未映射值保留（`keep`，默认）或置缺失（`missing`）。 |
 
-源文件**绝不**被覆盖。给出 `outputPath` 时清洗结果写入该路径（限定工作区内，按扩展名定格式）；否则仅预览。
+源文件**绝不**被覆盖。给出 `outputPath` 时清洗结果写入该路径（限定工作区内，按扩展名定格式）；否则仅预览。`dryRun: true` 时不写任何文件、不持久化任何内容——结果返回逐列清洗计划与预期的 `contract`/`diffPreview`。结果还携带交付前 `contract` 摘要，并持久化一份 `clean-diff` 前后对比画像报告。
 
-### `data_verify({ path, rules })`
+### `data_report({ key?, kind?, format? })`
+
+从存储域读回已持久化的报告。传 `key`（此前运行返回的精确 `reportKey`）取单份报告，或传 `kind`（`profile`/`clean`/`clean-diff`/`verify`/`citations`）按时间顺序列出该类全部报告；`key`/`kind` 恰需一个。格式错误或缺失的键响亮失败。`format: html`（需 `key`）把报告渲染为自包含离线 HTML 文档——内联 CSS/JS、无外部请求、DAMA 六维计分卡与画像/清洗汇总表（仅 profile/clean 报告）。
+
+### `data_verify({ path, rules, expectations? })`
 
 评估核查规则。规则参考：
 
@@ -116,6 +120,8 @@ dsh plugin --profile web remove dsh-data-quality   # 卸载
 | `freshness` | `column`, `maxAgeDays`, `asOf?` | 日期早于 `asOf` 前 `maxAgeDays` 天即失败（`asOf` 默认当前）；不可解析/缺失即失败。 |
 
 任何被读取的单元格缺失都会使该规则该行失败。每条规则的失败行证据上限为 `evidenceRowLimit`。
+
+`expectations` 用确定性指标对照期望值：`rowCount`、`columnSum`、`columnMean`、`uniqueCount`、`nullCount`（除 `rowCount` 外各带 `column`，加 `expected` 与可选相对 `tolerance`∈[0, 1]）。每项期望产出 `passed` 加 `actual`/`expected`/`tolerance`；不符是正常的 `passed: false` 判定，绝非工具错误。非法指标、缺失列、超范围 tolerance 响亮失败。
 
 ### `ctx.dataQuality`（供其他插件）
 
