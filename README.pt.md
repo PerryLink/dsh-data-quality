@@ -82,11 +82,11 @@ Todas as chaves são opcionais (valores padrão mostrados); valores inválidos f
 
 ## Tools & surfaces
 
-### `data_profile({ path, sample? })`
+### `data_profile({ path, sample?, industryPreset? })`
 
-Perfilam um dataset do workspace. `path` é relativo ao workspace (`.csv`/`.tsv`/`.json`/`.jsonl`; JSON deve ser um array de objetos planos). `sample` toma cada `ceil(N/sample)`-ésima linha para os cartões de coluna (determinístico; as contagens de linhas continuam exatas). Retorna o relatório estruturado e renderiza um resumo legível por coluna.
+Perfilam um dataset do workspace. `path` é relativo ao workspace (`.csv`/`.tsv`/`.json`/`.jsonl`; JSON deve ser um array de objetos planos). `sample` toma cada `ceil(N/sample)`-ésima linha para os cartões de coluna (determinístico; as contagens de linhas continuam exatas). `industryPreset` (`retail`/`saas`/`fund`/`real-estate`/`e-commerce`/`healthcare`/`logistics`/`manufacturing`/`energy`) injeta as colunas esperadas dessa indústria para que a dimensão `accuracy` do scorecard seja determinável; ids desconhecidos falham alto. Retorna o relatório estruturado e renderiza um resumo legível por coluna.
 
-### `data_clean({ path, rules, outputPath? })`
+### `data_clean({ path, rules, outputPath?, dryRun? })`
 
 Aplica `rules` na ordem do array; cada regra vê a saída da anterior. Referência de regras:
 
@@ -99,9 +99,13 @@ Aplica `rules` na ordem do array; cada regra vê a saída da anterior. Referênc
 | `trim` | `columns?` | Apara espaços de células de texto (todas as colunas se omitido). |
 | `map-values` | `column`, `map`, `else?` | Mapeamento por correspondência exata; valores não mapeados ficam (`keep`, padrão) ou viram `missing`. |
 
-O arquivo de origem **nunca** é sobrescrito. Com `outputPath` o dataset limpo é gravado lá (confinado ao workspace, formato por extensão); sem ele a execução é apenas prévia.
+O arquivo de origem **nunca** é sobrescrito. Com `outputPath` o dataset limpo é gravado lá (confinado ao workspace, formato por extensão); sem ele a execução é apenas prévia. Com `dryRun: true` nenhum arquivo é gravado e nada é persistido: o resultado devolve o plano de limpeza por coluna e o `contract`/`diffPreview` esperados. O resultado também carrega um resumo de `contract` pré-entrega, e um relatório de perfil `clean-diff` antes/depois é persistido no domínio de armazenamento.
 
-### `data_verify({ path, rules })`
+### `data_report({ key?, kind?, format? })`
+
+Lê relatórios persistidos do domínio de armazenamento. Passe `key` (o `reportKey` exato devolvido por uma execução anterior) para buscar um relatório, ou `kind` (`profile`/`clean`/`clean-diff`/`verify`/`citations`) para listar cronologicamente todos os relatórios desse tipo; exatamente um de `key`/`kind` é obrigatório. Chaves malformadas ou ausentes falham alto. `format: html` (com `key`) renderiza o relatório como um documento HTML offline autocontido: CSS/JS em linha, sem requisições externas, o scorecard DAMA de seis dimensões e as tabelas de resumo de perfil/limpeza (somente relatórios profile/clean).
+
+### `data_verify({ path, rules, expectations? })`
 
 Avalia regras de verificação. Referência de regras:
 
@@ -116,6 +120,8 @@ Avalia regras de verificação. Referência de regras:
 | `freshness` | `column`, `maxAgeDays`, `asOf?` | Falham datas mais velhas que `maxAgeDays` antes de `asOf` (padrão: agora); não parseável/ausente falha. |
 
 Uma célula ausente faz falhar toda regra que a lê. A evidência é limitada a `evidenceRowLimit` linhas falhas por regra.
+
+`expectations` reconcilia métricas determinísticas com valores esperados: `rowCount`, `columnSum`, `columnMean`, `uniqueCount`, `nullCount` (cada um com `column` exceto `rowCount`, mais `expected` e uma `tolerance` relativa opcional em [0, 1]). Cada expectativa produz `passed` mais `actual`/`expected`/`tolerance`; uma discrepância é um veredicto normal `passed: false`, nunca um erro de ferramenta. Métricas inválidas, colunas ausentes e tolerâncias fora de faixa falham alto.
 
 ### `ctx.dataQuality` (para outros plugins)
 
