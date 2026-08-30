@@ -18,7 +18,7 @@ import { apply as jsonApply, Config as jsonConfig } from '@deepseek-ai/dsh-stora
 import { apply as domainApply, Config as domainConfig } from '@deepseek-ai/dsh-storage-domain'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { CallId } from './call-id.ts'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { ToolExecutionResult } from '@deepseek-ai/dsh-tools'
 

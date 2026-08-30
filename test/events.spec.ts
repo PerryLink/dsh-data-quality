@@ -1,7 +1,8 @@
 /**
  * Adaptive session-event gate tests: the unknown-type skip path (no
  * `ignorable` support), the KNOWN-type plain-append path, and the
- * master-build `ignorable` probe path — plus the display-truncation helpers.
+ * pre-0.1.2 master-build `ignorable` probe path (0.1.2-alpha.1 removed the
+ * envelope, so the probe fails safe there) — plus the display-truncation helpers.
  * @module dsh-data-quality/test/events.spec
  */
 

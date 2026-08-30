@@ -5,14 +5,14 @@
  *
  * - Hosts whose known-type set already covers the vocabulary (a future harness
  *   that adopts these events) append plainly.
- * - Hosts with an `ignorable` append option (the master-build
- *   `Session.append(type, data, { ignorable: true })` contract) append with the
- *   marker, so builds that do not know the type skip the event on restore.
+ * - Hosts with an `ignorable` append option (pre-0.1.2 rc builds) append with
+ *   the marker, so builds that do not know the type skip the event on restore.
  * - 0.1.0-rc.6 and 0.1.0-rc.8 hosts have neither a registration surface nor an
  *   `ignorable` append option (rc.8's `Session.append` accepts surface metadata
- *   only, never the marker); appending an unknown type there would make the
- *   persistence coordinator refuse the session log on restore, so the append is
- *   skipped and the storage-domain report remains the durable copy.
+ *   only, never the marker), and 0.1.2-alpha.1 removed the `ignorable` envelope
+ *   entirely (42dc2a46c2) and fails closed on unknown types at read; on all of
+ *   them the append is skipped and the storage-domain report remains the
+ *   durable copy.
  * @module dsh-data-quality/events
  */
 
@@ -67,17 +67,17 @@ export const DATA_QUALITY_EVENT_TYPES = ['data-quality/profile', 'data-quality/c
 /** Union of the event types this plugin appends. */
 export type DataQualityEventType = (typeof DATA_QUALITY_EVENT_TYPES)[number]
 
-/** Loose append shape probed at runtime (rc.6/rc.8 take no options; master takes `ignorable`). */
+/** Loose append shape probed at runtime (rc.6/rc.8/0.1.2-alpha.1 take no options; pre-0.1.2 master builds took `ignorable`). */
 type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
 
 /**
  * Append one `data-quality/*` event when the host can carry it safely; skip
  * silently otherwise (the storage-domain report is always the durable copy).
  * The `ignorable` probe reads the UNBOUND method's source (a `.bind()` result
- * reports `[native code]`): the rc.6 and rc.8 builds contain no `ignorable`
- * handling while the master build references the flag by name; property names
- * survive minification, so the probe fails safe (skips) rather than corrupting
- * a log.
+ * reports `[native code]`): the rc.6/rc.8 builds and 0.1.2-alpha.1 contain no
+ * `ignorable` handling while pre-0.1.2 master builds referenced the flag by
+ * name; property names survive minification, so the probe fails safe (skips)
+ * rather than corrupting a log.
  * @param session - the calling session.
  * @param type - the event type.
  * @param data - the payload.
