@@ -3,7 +3,7 @@
  * `ctx.dataQuality` surface other plugins may optionally consume, plus the
  * internal request/report types the local Provider and the tool Consumers
  * share. The {@link CitationCheckRequest} / {@link CitationCheckResult}
- * citation contract is FROZEN for cross-plugin consumers — change it only
+ * citation contract is FROZEN for cross-plugin consumers 鈥?change it only
  * with a coordinated ecosystem migration.
  * @module dsh-data-quality/service
  */

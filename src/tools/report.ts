@@ -1,12 +1,12 @@
 /**
  * The `data_report` model tool: read persisted profile/clean-diff reports
  * back from the `data_quality` storage domain, by exact `reportKey` or by
- * `kind`. Deterministic read-only consumption — no model arithmetic.
+ * `kind`. Deterministic read-only consumption 鈥?no model arithmetic.
  * @module dsh-data-quality/tools/report
  */
 
 import { defineTool } from '@deepseek-ai/dsh-tools'
-import type { JsonValue } from '@deepseek-ai/dsh-session'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { ProfileReport } from '../profile.ts'
 import { renderCleanHtml, renderProfileHtml, type CleanReportHtml } from '../report-html.ts'
 import type { DataQualityService } from '../service.ts'
