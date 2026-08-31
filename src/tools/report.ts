@@ -1,7 +1,7 @@
 /**
  * The `data_report` model tool: read persisted profile/clean-diff reports
  * back from the `data_quality` storage domain, by exact `reportKey` or by
- * `kind`. Deterministic read-only consumption 鈥?no model arithmetic.
+ * `kind`. Deterministic read-only consumption — no model arithmetic.
  * @module dsh-data-quality/tools/report
  */
 

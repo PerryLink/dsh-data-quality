@@ -114,7 +114,7 @@ export function throwIfAborted(signal: AbortSignal | undefined): void {
 /**
  * Detect a UTF-8 byte-order mark and validate the byte sequence. Invalid
  * UTF-8 is a data-quality finding the profile reports (`validUtf8: false`)
- * rather than a structural error that blocks the read 鈥?the decoded text
+ * rather than a structural error that blocks the read — the decoded text
  * keeps U+FFFD replacement characters so the profile can still run.
  * @param buffer - raw file bytes.
  * @returns the encoding metadata.
@@ -397,7 +397,7 @@ export async function loadDocument(absolutePath: string, config: ResolvedConfig,
 
 /**
  * Deterministic systematic sample: every `ceil(total / count)`-th row from
- * index 0. No clock, no RNG 鈥?the same input always yields the same sample.
+ * index 0. No clock, no RNG — the same input always yields the same sample.
  * @param rows - full row list.
  * @param count - requested sample size.
  * @returns the sampled rows (identity when `count >= rows.length`).
