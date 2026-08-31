@@ -1,12 +1,12 @@
 /**
  * Presentation bounds for tool-facing canonical values: cell text is truncated
  * so one oversized cell cannot flood the model context. This is a display
- * safety invariant, not a deployment tunable — the durable storage-domain
+ * safety invariant, not a deployment tunable 鈥?the durable storage-domain
  * report always keeps full fidelity.
  * @module dsh-data-quality/present
  */
 
-import type { JsonValue } from '@deepseek-ai/dsh-session'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 
 /** Maximum characters one cell contributes to a tool-facing row payload. */
 export const MAX_CELL_TEXT = 120
@@ -19,7 +19,7 @@ export const MAX_CELL_TEXT = 120
  */
 export function truncateCell(cell: JsonValue): JsonValue {
   if (typeof cell === 'string' && cell.length > MAX_CELL_TEXT) {
-    return `${cell.slice(0, MAX_CELL_TEXT)}…`
+    return `${cell.slice(0, MAX_CELL_TEXT)}鈥
   }
   return cell
 }

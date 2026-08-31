@@ -3,13 +3,14 @@
  * `ctx.dataQuality` surface other plugins may optionally consume, plus the
  * internal request/report types the local Provider and the tool Consumers
  * share. The {@link CitationCheckRequest} / {@link CitationCheckResult}
- * citation contract is FROZEN for cross-plugin consumers 鈥?change it only
+ * citation contract is FROZEN for cross-plugin consumers 閳?change it only
  * with a coordinated ecosystem migration.
  * @module dsh-data-quality/service
  */
 
 import { Service, type Context } from '@deepseek-ai/cordis'
-import type { JsonValue, Session } from '@deepseek-ai/dsh-session'
+import type { Session } from '@deepseek-ai/dsh-session'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { CleanRule, CleanRuleLog } from './clean.ts'
 import type { CleanContractSummary, CleanProfileDiff } from './contract.ts'
 import type { ProfileReport } from './profile.ts'
