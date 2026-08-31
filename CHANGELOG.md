@@ -45,17 +45,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Documented, deliberate non-goals for this repository (recorded rather than silently omitted):
 
-- **Native xlsx** 鈥?a real Excel parser needs a new dependency (or a sidecar); this repo keeps a zero-dependency parsing contract, so CSV/TSV/JSON/JSONL are the supported dataset formats, now with UTF-8/BOM encoding detection.
-- **SQL / DuckDB access** 鈥?database drivers are out of scope for the zero-dependency, in-process TypeScript seam; tabular datasets are files.
-- **`qsv` as an alternative parser** 鈥?an external binary violates the no-external-processes contract.
-- **Slot client report panel** 鈥?a browser report panel needs a client half and bundle changes; the consumption path is covered by the `data_report` tool plus storage-domain persistence instead.
-- **Computer-use fallback collection** 鈥?macOS-only and brittle; the regular filesystem capability already covers the supported collection path.
+- **Native xlsx** — a real Excel parser needs a new dependency (or a sidecar); this repo keeps a zero-dependency parsing contract, so CSV/TSV/JSON/JSONL are the supported dataset formats, now with UTF-8/BOM encoding detection.
+- **SQL / DuckDB access** — database drivers are out of scope for the zero-dependency, in-process TypeScript seam; tabular datasets are files.
+- **`qsv` as an alternative parser** — an external binary violates the no-external-processes contract.
+- **Slot client report panel** — a browser report panel needs a client half and bundle changes; the consumption path is covered by the `data_report` tool plus storage-domain persistence instead.
+- **Computer-use fallback collection** — macOS-only and brittle; the regular filesystem capability already covers the supported collection path.
 
 ## [0.1.3] - 2026-08-23
 
 ### Changed
 
-- Persist the bounded clean `preview` in the durable `clean` report so the model-visible canonical result is fully reconstructable from its `reportKey` (model-visible 鉄?logged).
+- Persist the bounded clean `preview` in the durable `clean` report so the model-visible canonical result is fully reconstructable from its `reportKey` (model-visible ⟺ logged).
 
 ## [0.1.2] - 2026-08-22
 
@@ -73,7 +73,7 @@ Documented, deliberate non-goals for this repository (recorded rather than silen
 
 ### Added
 
-- The `ctx.dataQuality` capability seam (Service Definition / local deterministic Provider / tool Consumers) with the frozen cross-plugin `verifyCitations(request)` contract for document-number 鈫?dataset checks (verified / mismatch / not-found / unverifiable, relative-tolerance numeric comparison).
+- The `ctx.dataQuality` capability seam (Service Definition / local deterministic Provider / tool Consumers) with the frozen cross-plugin `verifyCitations(request)` contract for document-number ↔ dataset checks (verified / mismatch / not-found / unverifiable, relative-tolerance numeric comparison).
 - `data_profile` tool: deterministic dataset profiling (row/column counts, inferred types, missing rates, unique counts, numeric distributions, IQR outliers, mixed-type notes, duplicate-row counts) over workspace CSV/TSV/JSON/JSONL, with optional systematic sampling.
 - `data_clean` tool: ordered declarative cleaning rules (`dedupe`, `fill-missing`, `coerce-type`, `normalize-unit`, `trim`, `map-values`) with a per-rule audit log; the source file is never overwritten and cleaned output writes only inside the workspace.
 - `data_verify` tool: declarative verification rules (`not-null`, `unique`, `range`, `regex`, `enum`, `cross-column`, `freshness`) with capped failing-row evidence; overall failure is a normal `passed: false` result, never a tool error.
