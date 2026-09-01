@@ -11,8 +11,10 @@
  *   `ignorable` append option (rc.8's `Session.append` accepts surface metadata
  *   only, never the marker), and 0.1.2-alpha.1 removed the `ignorable` envelope
  *   entirely (42dc2a46c2) and fails closed on unknown types at read; on all of
- *   them the append is skipped and the storage-domain report remains the On 0.1.2-alpha.2 the envelope field is restored for stored-log read compatibility only - its Session.append still cannot stamp the marker, so the gate behavior is unchanged.
- *   durable copy.
+ *   them the append is skipped and the storage-domain report remains the
+ *   durable copy. On 0.1.2-alpha.3 the envelope field is retained for stored-log
+ *   read compatibility only - its Session.append still cannot stamp the marker,
+ *   so the gate behavior is unchanged.
  * @module dsh-data-quality/events
  */
 
