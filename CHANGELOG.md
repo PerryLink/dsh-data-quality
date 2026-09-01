@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Align devDeps pins to the published dsh 0.1.2-alpha.2 line (0.1.1-rc.2 -> 0.1.2-alpha.2); no behavior change to envelope/gating semantics.
+- Align devDeps pins to the published dsh 0.1.2-alpha.3 line (0.1.2-alpha.2 -> 0.1.2-alpha.3), widen the `dsh-storage-json` peer to `>=0.1.0-rc.8 <0.2.0`, and align `cordis`/`schemastery` to `^4.0.2`/`^3.18.2`. The adaptive event gate keeps failing safe on `0.1.2-alpha.3` (`Session.append` still cannot stamp the `ignorable` marker); the five-language READMEs record the alpha.3 fact.
 
 ## [0.3.1] - 2026-08-30
 
