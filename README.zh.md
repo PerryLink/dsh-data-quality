@@ -11,7 +11,7 @@
 
 | 组件 | 版本 |
 |---|---|
-| DeepSeek Harness | `0.1.1-rc.2`（peer 依赖钉版） |
+| DeepSeek Harness | `0.1.1-rc.2`（peer 依赖钉版） 0.1.2-alpha.2（2026-08-31 已适配）：会话信封保留 ignorable 字段但仅用于存量日志读取兼容——Session.append 仍无法盖章，门控行为不变。 |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | 包管理器 | `pnpm@11.7.0` |
 | 平台 | Windows / macOS / Linux（纯宿主插件） |

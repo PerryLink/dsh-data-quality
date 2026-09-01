@@ -11,7 +11,7 @@ Todo el cálculo es TypeScript puro dentro del proceso del harness — el modelo
 
 | Componente | Versión |
 |---|---|
-| DeepSeek Harness | `0.1.1-rc.2` (dependencias peer fijadas) |
+| DeepSeek Harness | `0.1.1-rc.2` (dependencias peer fijadas) 0.1.2-alpha.2 (adaptado el 2026-08-31): el sobre de sesión conserva su campo ignorable solo para compatibilidad de lectura de logs almacenados - Session.append aún no puede estamparlo, por lo que el comportamiento de la puerta no cambia. |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gestor de paquetes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin solo de host) |
