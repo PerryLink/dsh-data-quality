@@ -1,6 +1,6 @@
 {
   "name": "dsh-data-quality",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Deterministic data profiling, cleaning, and verification for DeepSeek Harness: a ctx.dataQuality capability seam (Service Definition / local Provider / tool Consumers) with data_profile, data_clean, and data_verify model tools, a frozen cross-plugin verifyCitations contract, durable reports in a storage domain, and data-quality/* session events on hosts that support them.",
   "repository": {
     "type": "git",
@@ -109,7 +109,9 @@
     "typescript": "^5.9.3",
     "zod": "^4.4.3"
   },
-  "devDependencies": {"@deepseek-ai/dsh-util-values": "0.1.2-alpha.3", "@deepseek-ai/dsh-attachment": "0.1.2-alpha.3", 
+  "devDependencies": {
+    "@deepseek-ai/dsh-util-values": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-attachment": "0.1.2-alpha.3",
     "@deepseek-ai/cordis": "^4.0.2",
     "@deepseek-ai/cordis-plugin-include": "1.0.6",
     "@deepseek-ai/cordis-plugin-loader": "1.0.2",
