@@ -17,7 +17,7 @@ All computation is plain TypeScript in the harness process — the model never d
 
 | Component | Version |
 |---|---|
-| DeepSeek Harness | `0.1.1-rc.2` (peer dependencies pinned) 0.1.2-alpha.3 (adapted 2026-09-01): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged. |
+| DeepSeek Harness | `0.1.1-rc.2` (peer dependencies pinned) 0.1.2-alpha.5 (adapted 2026-09-02): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged. |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Package manager | `pnpm@11.7.0` |
 | Platform | Windows / macOS / Linux (host-only plugin) |
