@@ -3,22 +3,11 @@
 #
 # Every key below is a Config field (Schemastery schema); invalid values fail
 # the profile load loudly. See README.md "Configuration" for the full table.
-# The storage stack rows mirror dsh-fast: the plugin injects `storageDomain`,
-# so a bare profile needs the hub + a JSON backend + the domain form mounted.
+# The shipped profiles (web/headless/sdk/acp) compose the storage stack
+# (storage + storage-json + storage-domain) through the dsh-base bundle, so
+# this patch mounts only the plugin row. A bare profile without dsh-base must
+# compose the storage stack itself.
 - insert:
-    - id: storage
-      name: '@deepseek-ai/dsh-storage'
-
-    - id: storage-json
-      name: '@deepseek-ai/dsh-storage-json'
-      config:
-        root: !!js dshHomePath('storages')
-
-    - id: storage-domain
-      name: '@deepseek-ai/dsh-storage-domain'
-      config:
-        backend: json
-
     - id: dsh-data-quality
       name: dsh-data-quality
       config:
