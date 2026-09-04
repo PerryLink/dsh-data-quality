@@ -17,7 +17,7 @@ All computation is plain TypeScript in the harness process — the model never d
 
 | Component | Version |
 |---|---|
-| DeepSeek Harness | `0.1.2-alpha.5` (adapted 2026-09-02): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged. |
+| DeepSeek Harness | `0.1.2-rc.1` (adapted 2026-09-02): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged. |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Package manager | `pnpm@11.7.0` |
 | Platform | Windows / macOS / Linux (host-only plugin) |
@@ -175,7 +175,7 @@ pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
 pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
 ```
 
-- Tests run vitest against the REAL `Context`/`Session`/`ToolRuntime`/storage domain from the 0.1.2-alpha.5 peers (no hand-written service mocks) plus pure engine specs; every clean/verify rule has positive and negative cases, and `verifyCitations` covers all four statuses.
+- Tests run vitest against the REAL `Context`/`Session`/`ToolRuntime`/storage domain from the 0.1.2-rc.1 peers (no hand-written service mocks) plus pure engine specs; every clean/verify rule has positive and negative cases, and `verifyCitations` covers all four statuses.
 - `scripts/loader-runner.mjs` boots the real Loader composition and executes the profile → clean → verify chain against `fixtures/` without an API key.
 - Release: `node scripts/release.mjs <x.y.z>` (never pushes; the tag triggers `release.yml`).
 
