@@ -118,6 +118,7 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
     }
   }
 
+  // Service Provider: constructs the local DataQualityService (which publishes ctx.dataQuality) and registers the four model tools below through ctx.tools.register.
   const service = new LocalDataQualityService(ctx, resolved, { store, now: Date.now })
   ctx.tools.register(defineProfileTool(service))
   ctx.tools.register(defineCleanTool(service))
