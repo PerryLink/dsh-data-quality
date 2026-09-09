@@ -51,7 +51,7 @@ beforeAll(async () => {
     '- id: system-prompt',
     "  name: '@deepseek-ai/dsh-system-prompt'",
     '  config:',
-    "    persona: ''",
+    "    personaPrefix: ''",
     '',
     '- id: tools',
     "  name: '@deepseek-ai/dsh-tools'",

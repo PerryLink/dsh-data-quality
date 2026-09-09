@@ -50,7 +50,7 @@ export async function mountBase(sessionId: string): Promise<BaseHarness> {
   await ctx.plugin({ apply: jsonApply, Config: jsonConfig, inject: ['storage'] }, { root: storageRoot })
   await ctx.plugin({ apply: domainApply, Config: domainConfig, inject: ['storage'] }, { backend: 'json' })
   // ToolRuntime injects systemPrompt; mount it first (real service, like dsh-fast's harness).
-  await ctx.plugin(SystemPrompt, { persona: '' })
+  await ctx.plugin(SystemPrompt, { personaPrefix: '' })
   await ctx.plugin(ToolRuntime)
   const workspace = await mkdtemp(path.join(tmpdir(), 'dq-work-'))
   const session = ctx.sessions.create(SessionId(sessionId), { meta: { cwd: workspace } })
