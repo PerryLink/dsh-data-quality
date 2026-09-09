@@ -6,6 +6,7 @@
 全部计算为 harness 进程内的纯 TypeScript —— 模型从不心算。`ctx.dataQuality` 能力缝隙（Service Definition / 本地 Provider / 工具 Consumer）对外提供三个模型工具，以及一份冻结的跨插件引用核查契约。
 
 [English](README.md) · [简体中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+[![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-data-quality.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
 
 ## Compatibility
 
