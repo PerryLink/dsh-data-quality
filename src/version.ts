@@ -5,7 +5,7 @@
  */
 
 /** The package version reported in persisted reports. */
-export const VERSION = '0.3.8'
+export const VERSION = '0.3.9'
 
 /**
  * Version of the persisted report schema. Bump it whenever a report's
