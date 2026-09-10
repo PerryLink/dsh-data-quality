@@ -39,6 +39,6 @@ Standalone DeepSeek Harness plugin repository (`dsh-data-quality`). Development 
 
 ## Docs
 
-- Five-language READMEs (`README.md`, `README.zh.md`, `README.es.md`, `README.pt.md`, `README.hi.md`) — keep all five in sync; the English file is the source of truth and the `## ` headings stay in English (the sync gate enforces structure and config keys). `scripts/check-readme-sync.mjs` (CI) is the enforcer.
+- Five-language READMEs (`README.md`, `README-zh.md`, `README-es.md`, `README-pt.md`, `README-hi.md`) — keep all five in sync; the English file is the source of truth and the `## ` headings stay in English (the sync gate enforces structure and config keys). `scripts/check-readme-sync.mjs` (CI) is the enforcer.
 - GitHub topics `dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification` (mirror `package.json` keywords).
 - License is Apache-2.0 (`LICENSE` + the package.json `license` field). `THIRD_PARTY_NOTICES.md` documents the build-time dependencies.

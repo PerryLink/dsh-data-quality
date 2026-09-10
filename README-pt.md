@@ -5,7 +5,7 @@
 
 Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz as contas. Uma costura de capacidade `ctx.dataQuality` (Service Definition / Provider local / Consumers de ferramentas) expõe três ferramentas para o modelo mais um contrato congelado de verificação de citações entre plugins.
 
-[English](README.md) · [简体中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+[English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
 [![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-data-quality.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
 
 ## Compatibility

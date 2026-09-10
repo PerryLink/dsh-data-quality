@@ -5,7 +5,7 @@
 
 सारी गणना harness प्रक्रिया के अंदर शुद्ध TypeScript है — मॉडल कभी हिसाब नहीं करता। `ctx.dataQuality` क्षमता सीम (Service Definition / लोकल Provider / टूल Consumer) तीन मॉडल टूल और एक जमे हुए क्रॉस-प्लगिन उद्धरण सत्यापन अनुबंध को उजागर करती है।
 
-[English](README.md) · [简体中文](README.zh.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
+[English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
 [![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-data-quality.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
 
 ## Compatibility
