@@ -189,6 +189,8 @@ pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:r
 
 ## PerryLink DSH Plugin Family
 
+这是 [PerryLink](https://github.com/PerryLink) 维护的 [40 个 DeepSeek Harness 插件](https://github.com/PerryLink) 之一。如果它能帮到你，其他的也会：
+
 | **[dsh-budget](https://github.com/PerryLink/dsh-budget)** | Cost governance for DeepSeek Harness: budgets, carbon, and latency in one panel. | |
 
 | Plugin | One-liner |

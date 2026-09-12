@@ -195,6 +195,8 @@ This repository has no public issue or pull request history yet; individual PR/i
 
 ## PerryLink DSH Plugin Family
 
+This project is one of the [40 DeepSeek Harness plugins](https://github.com/PerryLink) maintained by [PerryLink](https://github.com/PerryLink). If this one helps you, the others likely will too:
+
 | **[dsh-budget](https://github.com/PerryLink/dsh-budget)** | Cost governance for DeepSeek Harness: budgets, carbon, and latency in one panel. | |
 
 | Plugin | One-liner |
