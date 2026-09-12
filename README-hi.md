@@ -12,7 +12,7 @@
 
 | घटक | संस्करण |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.1` (2026-09-10 को अनुकूलित): सत्र लिफ़ाफ़ा अपना ignorable फ़ील्ड केवल संग्रहीत-लॉग पठन संगतता के लिए रखता है - Session.append अभी भी इसे स्टैम्प नहीं कर सकता, इसलिए गेट व्यवहार अपरिवर्तित है। 2026-09-10 को dsh-v0.1.5-rc.1 master checkout के विरुद्ध सत्यापित (पूर्ण गेट श्रृंखला + प्रोफ़ाइल इंस्टॉल स्मोक)। |
+| DeepSeek Harness | `dsh-v0.1.5-rc.2` (2026-09-10 को अनुकूलित): सत्र लिफ़ाफ़ा अपना ignorable फ़ील्ड केवल संग्रहीत-लॉग पठन संगतता के लिए रखता है - Session.append अभी भी इसे स्टैम्प नहीं कर सकता, इसलिए गेट व्यवहार अपरिवर्तित है। 2026-09-11 को dsh-v0.1.5-rc.2 master checkout के विरुद्ध सत्यापित (पूर्ण गेट श्रृंखला + प्रोफ़ाइल इंस्टॉल स्मोक)। |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | पैकेज मैनेजर | `pnpm@11.7.0` |
 | प्लेटफ़ॉर्म | Windows / macOS / Linux (केवल होस्ट प्लगिन) |
@@ -169,7 +169,7 @@ pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
 pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
 ```
 
-- टेस्ट 0.1.5-rc.1 peers के वास्तविक `Context`/`Session`/`ToolRuntime`/स्टोरेज डोमेन के विरुद्ध vitest चलाते हैं (हाथ से लिखे सेवा mock नहीं) और शुद्ध इंजन specs; हर क्लीन/सत्यापन नियम के सकारात्मक और नकारात्मक केस हैं, और `verifyCitations` चारों स्थितियों को कवर करता है।
+- टेस्ट 0.1.5-rc.2 peers के वास्तविक `Context`/`Session`/`ToolRuntime`/स्टोरेज डोमेन के विरुद्ध vitest चलाते हैं (हाथ से लिखे सेवा mock नहीं) और शुद्ध इंजन specs; हर क्लीन/सत्यापन नियम के सकारात्मक और नकारात्मक केस हैं, और `verifyCitations` चारों स्थितियों को कवर करता है।
 - `scripts/loader-runner.mjs` वास्तविक Loader संयोजन बूट करता है और API कुंजी के बिना `fixtures/` पर प्रोफ़ाइल → क्लीन → सत्यापन श्रृंखला चलाता है।
 - रिलीज़: `node scripts/release.mjs <x.y.z>` (कभी push नहीं; टैग `release.yml` ट्रिगर करता है)।
 

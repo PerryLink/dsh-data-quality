@@ -12,7 +12,7 @@ Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz
 
 | Componente | Versão |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.1` (adaptado em 2026-09-10): o envelope de sessão mantém seu campo ignorable apenas para compatibilidade de leitura de logs armazenados - o Session.append ainda não consegue estampá-lo, então o comportamento da porta não muda. Verificado em 2026-09-10 contra o checkout master dsh-v0.1.5-rc.1 (cadeia completa de portas + smoke de instalação de perfil). |
+| DeepSeek Harness | `dsh-v0.1.5-rc.2` (adaptado em 2026-09-10): o envelope de sessão mantém seu campo ignorable apenas para compatibilidade de leitura de logs armazenados - o Session.append ainda não consegue estampá-lo, então o comportamento da porta não muda. Verificado em 2026-09-11 contra o checkout master dsh-v0.1.5-rc.2 (cadeia completa de portas + smoke de instalação de perfil). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gerenciador de pacotes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin apenas de host) |
@@ -169,7 +169,7 @@ pnpm run typecheck && pnpm run typecheck:ci && pnpm test && pnpm run build
 pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:readme-sync && pnpm pack
 ```
 
-- Os testes correm vitest contra os `Context`/`Session`/`ToolRuntime`/domínio de armazenamento REAIS dos peers 0.1.5-rc.1 (sem mocks de serviços escritos à mão) mais specs de motores puros; cada regra de limpeza/verificação tem casos positivos e negativos, e `verifyCitations` cobre os quatro estados.
+- Os testes correm vitest contra os `Context`/`Session`/`ToolRuntime`/domínio de armazenamento REAIS dos peers 0.1.5-rc.2 (sem mocks de serviços escritos à mão) mais specs de motores puros; cada regra de limpeza/verificação tem casos positivos e negativos, e `verifyCitations` cobre os quatro estados.
 - `scripts/loader-runner.mjs` arranca a composição real do Loader e executa a cadeia perfilar → limpar → verificar contra `fixtures/` sem chave de API.
 - Release: `node scripts/release.mjs <x.y.z>` (nunca faz push; a tag dispara `release.yml`).
 
