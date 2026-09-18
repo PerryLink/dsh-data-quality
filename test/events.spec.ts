@@ -66,6 +66,25 @@ describe('appendDataQualityEvent', () => {
     expect(calls[0]?.[0]).toBe('data-quality/verify')
     expect(calls[0]?.[2]).toEqual({ ignorable: true })
   })
+
+  it('skips the append on the 0.1.6-alpha.2 form (third parameter is a SurfaceIntent, not an ignorable envelope)', () => {
+    // The alpha.2 append declaration takes `...opts: [SurfaceIntent]` for
+    // surface-eligible types only; a body that validates a surface intent and
+    // never mentions `ignorable` must leave the gate on its skip path, so the
+    // storage-domain report stays the durable copy.
+    const calls: unknown[] = []
+    const alpha2Session = {
+      append(type: string, payload: unknown, ...opts: [{ surfaceOp?: string }?]) {
+        const intent = opts[0]
+        if (intent?.surfaceOp !== undefined && !['append', 'replace'].includes(intent.surfaceOp)) {
+          throw new Error('session event carries an invalid surfaceOp')
+        }
+        calls.push([type, payload, opts])
+      },
+    } as unknown as Session
+    appendDataQualityEvent(alpha2Session, 'data-quality/profile', data())
+    expect(calls).toHaveLength(0)
+  })
 })
 
 describe('truncateCell / truncateRow', () => {

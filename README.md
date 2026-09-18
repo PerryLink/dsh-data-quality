@@ -18,7 +18,7 @@ All computation is plain TypeScript in the harness process — the model never d
 
 | Component | Version |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.2` (adapted 2026-09-10): the session envelope keeps its ignorable field for stored-log read compatibility only - Session.append still cannot stamp it, so audit-gate behavior is unchanged. Verified 2026-09-11 against the dsh-v0.1.5-rc.2 master checkout (full gate chain + profile install smoke). |
+| DeepSeek Harness | `dsh-v0.1.6-alpha.2` (adapted 2026-09-18): the peer range now admits the alpha.2 line; there `Session.append`'s third parameter exists only for surface-eligible types and is a `SurfaceIntent`, so the audit gate still skips and the storage-domain report stays the durable copy. Verified 2026-09-18 (dual typecheck rulers + full test suite green). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Package manager | `pnpm@11.7.0` |
 | Platform | Windows / macOS / Linux (host-only plugin) |

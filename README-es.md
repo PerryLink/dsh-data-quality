@@ -13,7 +13,7 @@ Todo el cálculo es TypeScript puro dentro del proceso del harness — el modelo
 
 | Componente | Versión |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.2` (adaptado el 2026-09-10): el sobre de sesión conserva su campo ignorable solo para compatibilidad de lectura de logs almacenados - Session.append aún no puede estamparlo, por lo que el comportamiento de la puerta no cambia. Verificado el 2026-09-11 contra el master checkout dsh-v0.1.5-rc.2 (cadena completa de puertas + smoke de instalación de perfil). |
+| DeepSeek Harness | `dsh-v0.1.6-alpha.2` (adaptado el 2026-09-18): el rango de peers admite la línea alpha.2; allí el tercer parámetro de `Session.append` existe solo para tipos de superficie y es un `SurfaceIntent`, así que la puerta de auditoría sigue omitiendo y el informe del dominio de almacenamiento sigue siendo la copia duradera. Verificado el 2026-09-18 (doble typecheck + suite completa en verde). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gestor de paquetes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin solo de host) |

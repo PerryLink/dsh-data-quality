@@ -13,7 +13,7 @@ Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz
 
 | Componente | Versão |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.2` (adaptado em 2026-09-10): o envelope de sessão mantém seu campo ignorable apenas para compatibilidade de leitura de logs armazenados - o Session.append ainda não consegue estampá-lo, então o comportamento da porta não muda. Verificado em 2026-09-11 contra o checkout master dsh-v0.1.5-rc.2 (cadeia completa de portas + smoke de instalação de perfil). |
+| DeepSeek Harness | `dsh-v0.1.6-alpha.2` (adaptado em 2026-09-18): o intervalo de peers agora admite a linha alpha.2; nela o terceiro parâmetro de `Session.append` existe apenas para tipos de superfície e é um `SurfaceIntent`, então o portão de auditoria continua pulando e o relatório do domínio de armazenamento continua sendo a cópia durável. Verificado em 2026-09-18 (typecheck duplo + suíte completa verde). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gerenciador de pacotes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin apenas de host) |

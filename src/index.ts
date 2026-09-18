@@ -102,6 +102,14 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
   let domain: Domain<typeof dataQualityDomainSpec> | undefined
   if (resolved.storeReports) {
     domain = await ctx.storageDomain.open(dataQualityDomainSpec)
+    // Disposal during the open await: the fiber is gone, so nothing may be
+    // registered any more — release the freshly opened handle instead of
+    // leaking it (the storage facility is single-open per name, so an
+    // unreleased handle also blocks a later remount).
+    if (ctx.fiber.uid === null) {
+      await domain.close()
+      return
+    }
     const reports = domain.table('reports')
     store = {
       put: async (record) => {
@@ -118,12 +126,19 @@ export async function apply(ctx: Context, config: Config = {}): Promise<void> {
     }
   }
 
-  // Service Provider: constructs the local DataQualityService (which publishes ctx.dataQuality) and registers the four model tools below through ctx.tools.register.
+  // Service Provider: constructs the local DataQualityService (which publishes ctx.dataQuality) and registers the four model tools below through ctx.tools.register. The registrations live in one effect whose disposer unregisters them in reverse order, so an unmount during apply can neither lose a registration nor leave one behind.
   const service = new LocalDataQualityService(ctx, resolved, { store, now: Date.now })
-  ctx.tools.register(defineProfileTool(service))
-  ctx.tools.register(defineCleanTool(service))
-  ctx.tools.register(defineVerifyTool(service))
-  ctx.tools.register(defineReportTool(service))
+  ctx.effect(() => {
+    const disposers = [
+      ctx.tools.register(defineProfileTool(service)),
+      ctx.tools.register(defineCleanTool(service)),
+      ctx.tools.register(defineVerifyTool(service)),
+      ctx.tools.register(defineReportTool(service)),
+    ]
+    return () => {
+      for (const dispose of disposers.reverse()) dispose()
+    }
+  }, 'dsh-data-quality: tools')
   logger.info(`dsh-data-quality ${VERSION} mounted: ctx.dataQuality + data_profile/data_clean/data_verify/data_report`)
 
   if (domain !== undefined) {
