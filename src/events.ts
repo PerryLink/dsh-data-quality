@@ -15,6 +15,13 @@
  *   durable copy. On 0.1.2-alpha.3 the envelope field is retained for stored-log
  *   read compatibility only - its Session.append still cannot stamp the marker,
  *   so the gate behavior is unchanged.
+ * - On the 0.1.6-alpha.2 line `Session.append<T>(type, data, ...opts)` takes a
+ *   third argument only for surface-eligible event types, and that argument is
+ *   a `SurfaceIntent` (an append/replace marker), never an `ignorable`
+ *   envelope: a non-surface `data-quality/*` type has no third parameter at
+ *   all, so the source-text probe below still finds no `ignorable` handling and
+ *   the result stays **skip** - the storage-domain report is the durable copy
+ *   on alpha.2 exactly as on the earlier lines.
  * @module dsh-data-quality/events
  */
 
@@ -69,7 +76,12 @@ export const DATA_QUALITY_EVENT_TYPES = ['data-quality/profile', 'data-quality/c
 /** Union of the event types this plugin appends. */
 export type DataQualityEventType = (typeof DATA_QUALITY_EVENT_TYPES)[number]
 
-/** Loose append shape probed at runtime (rc.6/rc.8/0.1.2-alpha.1 take no options; pre-0.1.2 master builds took `ignorable`). */
+/**
+ * Loose append shape probed at runtime (rc.6/rc.8/0.1.2-alpha.1 take no
+ * options; pre-0.1.2 master builds took `ignorable`; the 0.1.6-alpha.2 third
+ * parameter is a `SurfaceIntent` and exists only for surface-eligible types,
+ * so a `data-quality/*` call there has no third argument).
+ */
 type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
 
 /**
