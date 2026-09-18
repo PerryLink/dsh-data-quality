@@ -13,7 +13,7 @@
 
 | 组件 | 版本 |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.5-rc.2`（2026-09-10 已适配）：会话信封保留 ignorable 字段但仅用于存量日志读取兼容——Session.append 仍无法盖章，门控行为不变。已于 2026-09-11 对照 dsh-v0.1.5-rc.2 master 检出核验（完整门禁链 + profile 安装冒烟）。 |
+| DeepSeek Harness | `dsh-v0.1.6-alpha.2`（2026-09-18 已适配）：peer 区间已接纳 alpha.2 线；该线上 `Session.append` 的第三参仅对表面事件类型存在且为 `SurfaceIntent`，因此审计门控仍为跳过、storage-domain 报告仍是持久副本。已于 2026-09-18 核验（双 typecheck 尺子 + 全量测试绿）。 |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | 包管理器 | `pnpm@11.7.0` |
 | 平台 | Windows / macOS / Linux（纯宿主插件） |

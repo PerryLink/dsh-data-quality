@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Hold the four tool registrations (`data_profile` / `data_clean` / `data_verify` / `data_report`) in one effect whose disposer unregisters them in reverse order, and release a storage domain that finishes opening after the plugin fiber was already disposed. An unmount during `apply` can no longer lose the registrations (the previous shape registered them outside any effect, so an interrupt left nothing to roll back) nor leak the freshly opened domain handle. No user-visible behavior change.
+
+### Docs
+
+- Refresh the append-gate contract in `src/events.ts` for the 0.1.6-alpha.2 line: `Session.append<T>(type, data, ...opts)` takes a third argument only for surface-eligible event types, and that argument is a `SurfaceIntent`, never an `ignorable` envelope — a non-surface `data-quality/*` type has no third parameter at all, so the gate still skips and the storage-domain report stays the durable copy.
+
 ## [0.3.10] - 2026-09-12
 
 ### Changed
