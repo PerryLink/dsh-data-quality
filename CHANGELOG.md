@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `typecheck:checkout` (`tsc -p tsconfig.checkout.json --noEmit`) compiles the same `src` + `test` + `vitest.config.ts` program as `typecheck`, with the 13 `@deepseek-ai/*` packages this repo imports mapped to the local harness checkout's built type faces instead of the installed published ones. Every `@deepseek-ai/*` specifier under `src/` and `test/` was enumerated first and every mapped path verified to exist on disk. The repo previously had no checkout ruler, so nothing compiled against the checkout. It complements, not replaces, `typecheck` (installed published faces) and `typecheck:ci` (published faces, `skipLibCheck` off). Two failures the ruler surfaced were ruler-construction bugs rather than repo defects and were fixed without touching `src/` or any test. `AGENTS.md`'s checks chain and ruler note now name all three rulers.
+
+### Changed
+
+- Move the verified baseline to the published `0.1.7-alpha.2` line: all ten `@deepseek-ai/dsh-*` dev/test pins move from `0.1.5-rc.2` to `0.1.7-alpha.2`, `@deepseek-ai/cordis` to `^4.0.4` and `@deepseek-ai/schemastery` to `^3.18.4`. The schemastery caret also converges the tree on the single `3.18.4` copy the harness packages resolve, so the repo's copy can no longer fall behind the host's. The `@deepseek-ai/cordis` peer stays `^4.0.2`, which already admits `4.0.4`.
+- Every declared host range gains `|| >=0.1.7-0 <0.2.0`: the five `@deepseek-ai/dsh-*` peer bands now read `>=0.1.2-rc.1 <0.2.0 || >=0.1.5-alpha.1 <0.2.0 || >=0.1.6-0 <0.2.0 || >=0.1.7-0 <0.2.0`. This is a correctness fix, not a tightening: under npm semver's prerelease rule a comparator set whose only prerelease comparators sit on earlier `[major, minor, patch]` tuples cannot admit a later alpha, so the three-clause band excluded the very host line this release targets. No existing segment moved and nothing was narrowed.
+- `dshWorkshop.compatibility.dshVersions` records `0.1.7-alpha.2`; the five-language README compatibility rows name `dsh-v0.1.7-alpha.2` and quote the four-clause band; the `compat.yml` profile smoke installs the `0.1.7-alpha.2` CLI and bundle.
+
+### Fixed
+
+- `THIRD_PARTY_NOTICES.md` stated a peer surface from several lines back — `@deepseek-ai/dsh-*` at `0.1.1-rc.2`, `@deepseek-ai/cordis` `^4.0.1` and `@deepseek-ai/schemastery` `^3.18.0`. The table now matches what `package.json` actually declares: the four-clause `@deepseek-ai/dsh-*` band, `^4.0.2` and `^3.18.2`.
+
 ## [0.3.12] - 2026-09-19
 
 ### Added
