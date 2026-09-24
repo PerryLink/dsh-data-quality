@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Move the `@deepseek-ai/dsh-*` host pins to the published `0.1.7-rc.1` line and re-verify this plugin against that host line.
+- `dshWorkshop.compatibility.dshVersions` records `0.1.7-rc.1`; the five-language README compatibility rows name `dsh-v0.1.7-rc.1`.
+
 ## [0.3.13] - 2026-09-23
 
 ### Added
