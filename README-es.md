@@ -11,6 +11,13 @@ Todo el cálculo es TypeScript puro dentro del proceso del harness — el modelo
 [![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/dsh-data-quality)
 [![dshfind](https://dshfind.com/api/badge/PerryLink/dsh-data-quality?metric=downloads&lang=es)](https://dshfind.com/es/plugins/PerryLink/dsh-data-quality?ref=badge)
 
+
+<!-- star-cta -->
+## ⭐ 如果它帮到了你
+
+Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryLink) (más de 40, todos Apache-2.0). Si te resulta útil, **dale una estrella**: no desbloquea nada, pero ayuda a que la siguiente persona lo encuentre antes.
+
+*English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
 ## Compatibility
 
 | Componente | Versión |
