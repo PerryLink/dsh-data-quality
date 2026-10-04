@@ -29,7 +29,7 @@ All computation is plain TypeScript in the harness process — the model never d
 
 | Component | Version |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.7-rc.2` (adapted 2026-09-24): the peer range now admits the alpha.2 line; there `Session.append`'s third parameter exists only for surface-eligible types and is a `SurfaceIntent`, so the audit gate still skips and the storage-domain report stays the durable copy. Verified 2026-09-24 (dual typecheck rulers + full test suite green). |
+| DeepSeek Harness | `dsh-v0.2.1-alpha.1` (adapted 2026-10-04): the peer range now admits the alpha.2 line; there `Session.append`'s third parameter exists only for surface-eligible types and is a `SurfaceIntent`, so the audit gate still skips and the storage-domain report stays the durable copy. Verified 2026-09-24 (dual typecheck rulers + full test suite green). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Package manager | `pnpm@11.7.0` |
 | Platform | Windows / macOS / Linux (host-only plugin) |

@@ -22,7 +22,7 @@ Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryL
 
 | Componente | Versión |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.7-rc.2` (adaptado el 2026-09-24): el rango de peers admite la línea alpha.2; allí el tercer parámetro de `Session.append` existe solo para tipos de superficie y es un `SurfaceIntent`, así que la puerta de auditoría sigue omitiendo y el informe del dominio de almacenamiento sigue siendo la copia duradera. Verificado el 2026-09-24 (doble typecheck + suite completa en verde). |
+| DeepSeek Harness | `dsh-v0.2.1-alpha.1` (adaptado el 2026-10-04): el rango de peers admite la línea alpha.2; allí el tercer parámetro de `Session.append` existe solo para tipos de superficie y es un `SurfaceIntent`, así que la puerta de auditoría sigue omitiendo y el informe del dominio de almacenamiento sigue siendo la copia duradera. Verificado el 2026-09-24 (doble typecheck + suite completa en verde). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gestor de paquetes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin solo de host) |

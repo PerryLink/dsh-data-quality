@@ -22,7 +22,7 @@ Este plugin faz parte da [família de plugins DSH](https://github.com/PerryLink)
 
 | Componente | Versão |
 |---|---|
-| DeepSeek Harness | `dsh-v0.1.7-rc.2` (adaptado em 2026-09-24): o intervalo de peers agora admite a linha alpha.2; nela o terceiro parâmetro de `Session.append` existe apenas para tipos de superfície e é um `SurfaceIntent`, então o portão de auditoria continua pulando e o relatório do domínio de armazenamento continua sendo a cópia durável. Verificado em 2026-09-24 (typecheck duplo + suíte completa verde). |
+| DeepSeek Harness | `dsh-v0.2.1-alpha.1` (adaptado em 2026-10-04): o intervalo de peers agora admite a linha alpha.2; nela o terceiro parâmetro de `Session.append` existe apenas para tipos de superfície e é um `SurfaceIntent`, então o portão de auditoria continua pulando e o relatório do domínio de armazenamento continua sendo a cópia durável. Verificado em 2026-09-24 (typecheck duplo + suíte completa verde). |
 | Node.js | `^22.19.0 \|\| >=24.0.0` |
 | Gerenciador de pacotes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin apenas de host) |
