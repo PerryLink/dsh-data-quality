@@ -12,6 +12,8 @@ Todo el cálculo es TypeScript puro dentro del proceso del harness — el modelo
 [![dshfind](https://dshfind.com/api/badge/PerryLink/dsh-data-quality?metric=downloads&lang=es)](https://dshfind.com/es/plugins/PerryLink/dsh-data-quality?ref=badge)
 
 
+**📖 Base de conocimiento del ecosistema** — datos medidos, no marketing: [guía de desarrollo · datos de selección · criterios de mantenimiento](https://perrylink.github.io/dsh-plugin-guide/).
+
 <!-- star-cta -->
 ## ⭐ 如果它帮到了你
 

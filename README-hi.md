@@ -12,6 +12,8 @@
 [![dshfind](https://dshfind.com/api/badge/PerryLink/dsh-data-quality?metric=downloads&lang=hi)](https://dshfind.com/hi/plugins/PerryLink/dsh-data-quality?ref=badge)
 
 
+**📖 इकोसिस्टम नॉलेज बेस** — मापे गए आँकड़े, मार्केटिंग नहीं: [डेवलपमेंट गाइड · चयन डेटा · रखरखाव मानदंड](https://perrylink.github.io/dsh-plugin-guide/)।
+
 <!-- star-cta -->
 ## ⭐ 如果它帮到了你
 
