@@ -1,4 +1,7 @@
 # dsh-data-quality
+
+Perfilado, limpieza y verificación de datos deterministas para DeepSeek Harness.
+
 - **Canal 1024 store**: `npm i -g dsh1024` una vez, luego `dsh1024 plugin --profile web add dsh-data-quality` (cuenta para el ranking de instalaciones de [deepseek1024.com](https://deepseek1024.com)).
 
 **Perfilado, limpieza y verificación de datos deterministas para DeepSeek Harness.**
