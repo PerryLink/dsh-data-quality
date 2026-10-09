@@ -27,6 +27,18 @@ All computation is plain TypeScript in the harness process — the model never d
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
 
 
+## What is dsh-data-quality?
+
+Deterministic data profiling, cleaning, and verification for DeepSeek Harness.
+
+![Terminal demo of dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+
+## Comparison
+
+![Measured comparison chart for dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)
+
+fixtures/dirty-fund-holdings.csv (10 rows x 6 columns) · 5 determinable dimensions · run locally
+
 ## Compatibility
 
 | Component | Version |
@@ -47,6 +59,10 @@ All computation is plain TypeScript in the harness process — the model never d
 - **Session events** — on hosts that can carry them safely, runs append `data-quality/profile` / `data-quality/clean` / `data-quality/verify` events (with the `ignorable` marker where supported). On the published `0.1.7-rc.2` line (as on earlier rc lines) the append is skipped by design — the storage-domain report is always the durable copy (see "Known limitations").
 
 ## Quick start
+
+```sh
+dsh plugin --profile web add github:PerryLink/dsh-data-quality
+```
 
 ### npm channel
 

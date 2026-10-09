@@ -20,6 +20,18 @@
 这个插件是 [DSH 插件家族](https://github.com/PerryLink)的一员（40+ 个，全部 Apache-2.0）。如果你在用，**给个 star** —— 它不会解锁任何功能，但会让下一个人在搜索里更容易找到它。
 
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
+## What is dsh-data-quality?
+
+DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
+
+![dsh-data-quality 终端演示：dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+
+## Comparison
+
+![dsh-data-quality 的实测对比柱状图](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)
+
+fixtures/dirty-fund-holdings.csv (10 rows x 6 columns) · 5 determinable dimensions · run locally
+
 ## Compatibility
 
 | 组件 | 版本 |
@@ -39,6 +51,10 @@
 - **会话事件** —— 宿主支持时，运行会追加 `data-quality/profile` / `data-quality/clean` / `data-quality/verify` 事件（支持处带 `ignorable` 标记）。在已发布的 `0.1.7-rc.2` 线上（与更早的 rc 线一样）按设计跳过 append —— storage domain 报告始终是持久副本（见「Known limitations」）。
 
 ## Quick start
+
+```sh
+dsh plugin --profile web add github:PerryLink/dsh-data-quality
+```
 
 ### npm 通道
 

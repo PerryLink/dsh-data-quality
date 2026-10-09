@@ -20,6 +20,18 @@
 यह प्लगइन [DSH प्लगइन परिवार](https://github.com/PerryLink) का हिस्सा है (40+ प्लगइन, सभी Apache-2.0)। अगर यह उपयोगी लगे, तो **एक स्टार दें** — इससे कोई सुविधा अनलॉक नहीं होती, पर अगला व्यक्ति इसे खोज में आसानी से पा लेता है।
 
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
+## What is dsh-data-quality?
+
+DeepSeek Harness के लिए निर्धारणात्मक (deterministic) डेटा प्रोफ़ाइलिंग, क्लीनिंग और सत्यापन।
+
+![dsh-data-quality का टर्मिनल डेमो: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+
+## Comparison
+
+![dsh-data-quality का मापा गया तुलना चार्ट](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)
+
+fixtures/dirty-fund-holdings.csv (10 rows x 6 columns) · 5 determinable dimensions · run locally
+
 ## Compatibility
 
 | घटक | संस्करण |
@@ -39,6 +51,10 @@
 - **सत्र ईवेंट** — जिन होस्ट पर सुरक्षित रूप से संभव है, रन `data-quality/profile` / `data-quality/clean` / `data-quality/verify` ईवेंट जोड़ते हैं (जहाँ समर्थित हो वहाँ `ignorable` चिह्न सहित)। प्रकाशित `0.1.7-rc.2` लाइन पर (पहले की rc लाइनों की तरह) append जानबूझकर छोड़ा जाता है — स्टोरेज-डोमेन रिपोर्ट हमेशा टिकाऊ प्रति होती है (देखें «Known limitations»)।
 
 ## Quick start
+
+```sh
+dsh plugin --profile web add github:PerryLink/dsh-data-quality
+```
 
 ### npm चैनल
 

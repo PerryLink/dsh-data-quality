@@ -20,6 +20,18 @@ Todo el cálculo es TypeScript puro dentro del proceso del harness — el modelo
 Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryLink) (más de 40, todos Apache-2.0). Si te resulta útil, **dale una estrella**: no desbloquea nada, pero ayuda a que la siguiente persona lo encuentre antes.
 
 *English:* part of a 40+ plugin family for DeepSeek Harness. If it is useful, **a star helps the next person find it** — nothing is gated behind it.
+## What is dsh-data-quality?
+
+Perfilado, limpieza y verificación de datos deterministas para DeepSeek Harness.
+
+![Demostración de terminal de dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+
+## Comparison
+
+![Gráfico comparativo medido de dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)
+
+fixtures/dirty-fund-holdings.csv (10 rows x 6 columns) · 5 determinable dimensions · run locally
+
 ## Compatibility
 
 | Componente | Versión |
@@ -39,6 +51,10 @@ Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryL
 - **Eventos de sesión** — en hosts que los soportan con seguridad, las ejecuciones añaden eventos `data-quality/profile` / `data-quality/clean` / `data-quality/verify` (con la marca `ignorable` donde se admite). En la línea publicada `0.1.7-rc.2` (como en las líneas rc anteriores) el append se omite por diseño — el informe del dominio de almacenamiento es siempre la copia duradera (véase «Known limitations»).
 
 ## Quick start
+
+```sh
+dsh plugin --profile web add github:PerryLink/dsh-data-quality
+```
 
 ### Canal npm
 
