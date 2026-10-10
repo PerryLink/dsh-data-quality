@@ -36,6 +36,10 @@ Deterministic data profiling, cleaning, and verification for DeepSeek Harness.
 
 ![Terminal demo of dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
 
+![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+
+*The same run, animated.*
+
 ## Comparison
 
 ![Measured comparison chart for dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)

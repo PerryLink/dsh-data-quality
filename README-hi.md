@@ -30,6 +30,10 @@ DeepSeek Harness के लिए निर्धारणात्मक (deter
 
 ![dsh-data-quality का टर्मिनल डेमो: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
 
+![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+
+*वही रन, एनिमेटेड।*
+
 ## Comparison
 
 ![dsh-data-quality का मापा गया तुलना चार्ट](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)

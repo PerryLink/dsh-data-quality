@@ -30,6 +30,10 @@ Perfilamento, limpeza e verificação de dados determinísticos para DeepSeek Ha
 
 ![Demonstração de terminal do dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
 
+![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+
+*A mesma execução, animada.*
+
 ## Comparison
 
 ![Gráfico comparativo medido do dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-evidence.png)
