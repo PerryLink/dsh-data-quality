@@ -21,7 +21,7 @@ interface ReportView {
   readonly kind: ReportRecord['kind']
   readonly at: number
   readonly dataset: string
-  readonly report: JsonValue
+  readonly report?: JsonValue
 }
 
 /** The canonical value the tool returns. */
@@ -45,8 +45,8 @@ function renderRecordHtml(record: StoredReport): string {
 }
 
 /** Project a stored report into the canonical value (the stored report is already lossless JSON). */
-function toView(record: StoredReport): ReportView {
-  return { key: record.key, kind: record.kind, at: record.at, dataset: record.dataset, report: record.report as unknown as JsonValue }
+function toView(record: StoredReport, includeReport: boolean): ReportView {
+  return { key: record.key, kind: record.kind, at: record.at, dataset: record.dataset, ...includeReport ? { report: record.report as unknown as JsonValue } : {} }
 }
 
 /** Human-readable report summary for the tool's Native render. */
@@ -58,7 +58,7 @@ function renderReportText(value: DataReportValue): string {
     lines.push(`Reports of kind ${value.kind ?? ''} (${value.records.length})`)
   }
   for (const record of value.records) {
-    lines.push(`- ${record.key} [${record.kind}] ${record.dataset} @ ${new Date(record.at).toISOString()}`)
+    lines.push(`- ${record.key} [${record.kind}] ${record.dataset} @ ${new Date(record.at).toISOString()}${record.report === undefined ? ' (envelope only)' : ''}`)
   }
   return lines.join('\n')
 }
@@ -80,6 +80,7 @@ export function defineReportTool(service: DataQualityService) {
       key: { type: 'string', description: 'Exact storage reportKey (e.g. 20260819000000000-profile-1a2b3c4d); fetches that one report.' },
       kind: { type: 'string', enum: [...REPORT_KINDS], description: 'Report kind to list (profile/clean/clean-diff/verify/citations).' },
       format: { type: 'string', enum: ['json', 'html'], description: 'Output format. json (default) returns the report envelope(s); html renders one report as a self-contained offline HTML document (requires key; profile/clean only).' },
+      includeReports: { type: 'boolean', description: 'When listing by kind, also return the full stored report bodies. Default false: envelopes only. A key lookup always returns the full report.' },
     },
     output: {
       schema: {
@@ -96,7 +97,7 @@ export function defineReportTool(service: DataQualityService) {
                 kind: { type: 'string', enum: [...REPORT_KINDS], required: true },
                 at: { type: 'number', required: true },
                 dataset: { type: 'string', required: true },
-                report: { type: 'json', required: true },
+                report: { type: 'json', description: 'Full stored report; omitted from kind listings unless includeReports is true.' },
               },
               additionalProperties: false,
             },
@@ -123,7 +124,7 @@ export function defineReportTool(service: DataQualityService) {
         const record = await service.getReport(args.key as string)
         return {
           key: args.key as string,
-          records: [toView(record)],
+          records: [toView(record, true)],
           ...(format === 'html' ? { html: renderRecordHtml(record) } : {}),
         }
       }
@@ -131,7 +132,7 @@ export function defineReportTool(service: DataQualityService) {
         throw new Error('data_report html format requires key (exactly one report)')
       }
       const records = await service.listReports(args.kind as ReportRecord['kind'])
-      return { kind: args.kind as ReportRecord['kind'], records: records.map(toView) }
+      return { kind: args.kind as ReportRecord['kind'], records: records.map(record => toView(record, args.includeReports === true)) }
     },
   })
 }

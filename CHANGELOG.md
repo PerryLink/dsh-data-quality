@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.22] - 2026-10-18
+
+### Changed
+
+- **`data_report` kind listings return envelopes by default.** The tool now returns `key/kind/at/dataset` only unless `includeReports: true`; a `key` lookup still returns the full report. This keeps a 96-row listing from dumping every report body into the model context.
+
 ## [0.3.21] - 2026-10-18
 
 ### Changed
