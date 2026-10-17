@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.20] - 2026-10-18
+
+### Changed
+
+- Compatibility: `engines.dsh` -> `>=0.2.1-0 <0.3.0`; devDependencies to `0.2.1-rc.2`; add `@deepseek-ai/dsh-working-directory`; pin `zod` to `4.4.3` so the published peer tree has one zod copy.
+
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
