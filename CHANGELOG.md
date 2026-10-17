@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.17] - 2026-10-04
 
-undefined
+Release notes were not recorded; this section is retained to keep the version history continuous.
 
 ## [0.3.16] - 2026-10-04
 

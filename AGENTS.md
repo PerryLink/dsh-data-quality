@@ -4,7 +4,7 @@ Standalone DeepSeek Harness plugin repository (`dsh-data-quality`). Development 
 
 ## Layout
 
-- `src/index.ts` — function-plugin contract (`name`/`inject`/`Config`/`apply`; NO default export). Injects `tools` and `storageDomain`. Async `apply`: resolves config, opens the `data_quality` domain, constructs the service (publishes `ctx.dataQuality`), registers the three tools, and closes the domain from one `ctx.effect` disposer.
+- `src/index.ts` — function-plugin contract (`name`/`inject`/`Config`/`apply`; NO default export). Injects `tools` and `storageDomain`. Async `apply`: resolves config, opens the `data_quality` domain, constructs the service (publishes `ctx.dataQuality`), registers the four tools (`data_profile`, `data_clean`, `data_verify`, `data_report`), and closes the domain from one `ctx.effect` disposer.
 - `src/service.ts` — the Service Definition: the frozen cross-plugin `CitationCheckRequest`/`CitationCheckResult` contract (byte-stable; change only with an ecosystem migration), the internal request/report types, the abstract `DataQualityService`, and the `Context` declaration merge.
 - `src/provider-local.ts` — the local deterministic Provider: orchestrates loading, engines, persistence, and the adaptive session events. Uses TypeScript `private` (never ECMA `#` fields — cordis proxies service access and `#` fields throw on the proxy receiver).
 - `src/dataset.ts` — workspace-confined path resolution, size/row guards, hand-rolled CSV/TSV/JSON/JSONL parsers, deterministic systematic sampling, strict scalar parsers. Cells are `JsonValue`.
