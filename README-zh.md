@@ -28,7 +28,7 @@ DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
 
 DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
 
-![dsh-data-quality 终端演示：dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+![dsh-data-quality 终端演示：dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-hero.png)
 
 ![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
 

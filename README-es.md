@@ -28,7 +28,7 @@ Este plugin forma parte de la [familia de plugins DSH](https://github.com/PerryL
 
 Perfilado, limpieza y verificación de datos deterministas para DeepSeek Harness.
 
-![Demostración de terminal de dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.png)
+![Demostración de terminal de dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-hero.png)
 
 ![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
 

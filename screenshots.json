@@ -1,6 +1,14 @@
-{
-  "screenshots": [
-    "docs/assets/dsh-data-quality-demo.png",
-    "docs/assets/dsh-data-quality-evidence.png"
-  ]
-}
+[
+  {
+    "path": "docs/assets/dsh-data-quality-hero.png",
+    "kind": "hero",
+    "alt": "dsh-data-quality terminal output",
+    "caption": "Real dsh-data-quality test run; 174 tests passed."
+  },
+  {
+    "path": "docs/assets/dsh-data-quality-demo.gif",
+    "kind": "demo",
+    "alt": "Animated dsh-data-quality terminal session",
+    "caption": "The same run, assembled line by line."
+  }
+]
