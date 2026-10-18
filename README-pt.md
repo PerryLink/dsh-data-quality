@@ -9,6 +9,11 @@ Perfilamento, limpeza e verificação de dados determinísticos para DeepSeek Ha
 Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz as contas. Uma costura de capacidade `ctx.dataQuality` (Service Definition / Provider local / Consumers de ferramentas) expõe três ferramentas para o modelo mais um contrato congelado de verificação de citações entre plugins.
 
 [English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
+
+```sh
+dsh plugin --profile <name> add dsh-data-quality
+```
+
 [![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-data-quality.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
 [![DSH Market](https://raw.githubusercontent.com/2BingLing/dsh-market/master/assets/readme/badge-listed-en.svg)](https://dsh.market/)
 [![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/dsh-data-quality)
@@ -18,6 +23,13 @@ Todo o cálculo é TypeScript puro no processo do harness — o modelo nunca faz
 **📖 Base de conhecimento do ecossistema** — dados medidos, não marketing: [guia de desenvolvimento · dados de seleção · critérios de manutenção](https://perrylink.github.io/dsh-plugin-guide/).
 
 <!-- star-cta -->
+## Install & uninstall
+
+```sh
+dsh plugin --profile web add dsh-data-quality      # instalar (npm) — ou as formas acima
+dsh plugin --profile web remove dsh-data-quality   # desinstalar
+```
+
 ## ⭐ 如果它帮到了你
 
 Este plugin faz parte da [família de plugins DSH](https://github.com/PerryLink) (mais de 40, todos Apache-2.0). Se for útil, **deixe uma estrela**: não desbloqueia nada, mas ajuda a próxima pessoa a encontrá-lo.
@@ -93,13 +105,6 @@ allowBuilds:
 Reinicie o profile após instalar (bundles ativam no reinício). Depois peça ao agente, num workspace com um CSV:
 
 > Perfile `holdings.csv`, depois limpe-o aparando espaços, desduplicando por `fund_code` e normalizando as unidades 万/亿 da coluna `holding_value`; por fim verifique que `fund_code` é único e não nulo.
-
-## Install & uninstall
-
-```sh
-dsh plugin --profile web add dsh-data-quality      # instalar (npm) — ou as formas acima
-dsh plugin --profile web remove dsh-data-quality   # desinstalar
-```
 
 ## Configuration
 

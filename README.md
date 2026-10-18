@@ -20,9 +20,21 @@ All computation is plain TypeScript in the harness process — the model never d
 
 [English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
 
+```sh
+dsh plugin --profile <name> add dsh-data-quality
+```
+
+
 **📖 Ecosystem knowledge base** — measured data, not marketing: [plugin development guide · plugin-selection data · maintenance criteria](https://perrylink.github.io/dsh-plugin-guide/).
 
 <!-- star-cta -->
+## Install & uninstall
+
+```sh
+dsh plugin --profile web add dsh-data-quality      # install (npm) — or the forms above
+dsh plugin --profile web remove dsh-data-quality   # uninstall
+```
+
 ## ⭐ 如果它帮到了你
 
 这个插件是 [DSH 插件家族](https://github.com/PerryLink)的一员（40+ 个，全部 Apache-2.0）。如果你在用，**给个 star** —— 它不会解锁任何功能，但会让下一个人在搜索里更容易找到它。
@@ -100,13 +112,6 @@ allowBuilds:
 Restart the profile after installing (bundles activate on restart). Then ask the agent, in a workspace containing a CSV:
 
 > Profile `holdings.csv`, then clean it by trimming whitespace, deduplicating on `fund_code`, and normalizing the `holding_value` column's 万/亿 units; finally verify `fund_code` is unique and not null.
-
-## Install & uninstall
-
-```sh
-dsh plugin --profile web add dsh-data-quality      # install (npm) — or the forms above
-dsh plugin --profile web remove dsh-data-quality   # uninstall
-```
 
 ## Configuration
 

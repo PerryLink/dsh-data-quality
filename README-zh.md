@@ -9,6 +9,11 @@ DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
 全部计算为 harness 进程内的纯 TypeScript —— 模型从不心算。`ctx.dataQuality` 能力缝隙（Service Definition / 本地 Provider / 工具 Consumer）对外提供三个模型工具，以及一份冻结的跨插件引用核查契约。
 
 [English](README.md) · [简体中文](README-zh.md) · [Español](README-es.md) · [Português](README-pt.md) · [हिन्दी](README-hi.md)
+
+```sh
+dsh plugin --profile <name> add dsh-data-quality
+```
+
 [![dsh-doctor](https://raw.githubusercontent.com/PerryLink/dsh-plugin-doctor/main/badges/PerryLink__dsh-data-quality.svg)](https://github.com/PerryLink/dsh-plugin-doctor#verified-徽章)
 [![DSH Market](https://raw.githubusercontent.com/2BingLing/dsh-market/master/assets/readme/badge-listed-zh.svg)](https://dsh.market/)
 [![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/dsh-data-quality)
@@ -18,6 +23,13 @@ DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
 **📖 生态实测知识库**（实测数据，不是营销）：[插件开发指南 · 选型实测数据 · 维护取舍判据](https://perrylink.github.io/dsh-plugin-guide/)。
 
 <!-- star-cta -->
+## Install & uninstall
+
+```sh
+dsh plugin --profile web add dsh-data-quality      # 安装（npm）——或用上述其他形式
+dsh plugin --profile web remove dsh-data-quality   # 卸载
+```
+
 ## ⭐ 如果它帮到了你
 
 这个插件是 [DSH 插件家族](https://github.com/PerryLink)的一员（40+ 个，全部 Apache-2.0）。如果你在用，**给个 star** —— 它不会解锁任何功能，但会让下一个人在搜索里更容易找到它。
@@ -93,13 +105,6 @@ allowBuilds:
 安装后重启 profile 生效（bundle 重启激活）。然后在包含 CSV 的工作区中对 agent 说：
 
 > 先梳理 `holdings.csv`，再按规则清洗：去空白、按 `fund_code` 去重、把 `holding_value` 列的 万/亿 单位归一；最后核查 `fund_code` 唯一且非空。
-
-## Install & uninstall
-
-```sh
-dsh plugin --profile web add dsh-data-quality      # 安装（npm）——或用上述其他形式
-dsh plugin --profile web remove dsh-data-quality   # 卸载
-```
 
 ## Configuration
 
