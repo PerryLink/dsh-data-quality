@@ -227,7 +227,7 @@ pnpm run verify:self-contained && pnpm run verify:artifacts && pnpm run verify:r
 
 本仓库暂无公开 issue 或 pull request 历史；后续将在此逐个记名 PR/issue 编号。
 
-## PerryLink DSH 插件家族
+## PerryLink DSH Plugin Family
 
 本项目是 [PerryLink](https://github.com/PerryLink) 维护的 DeepSeek Harness 插件家族成员。完整名单默认折叠，避免每个 README 的首屏被长表淹没；点击展开可查看每一行及其状态。
 

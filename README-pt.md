@@ -227,7 +227,7 @@ Obrigado a todos os que deram forma a este plugin.
 
 Este repositório ainda não tem histórico público de issues ou pull requests; os números de PR/issue serão creditados aqui quando surgirem.
 
-## Família de plugins DSH da PerryLink
+## PerryLink DSH Plugin Family
 
 Este projeto faz parte da família de plugins do DeepSeek Harness da [PerryLink](https://github.com/PerryLink). O registro fica recolhido abaixo para que cada README mantenha uma primeira tela curta; expanda para ver cada linha e seu status.
 
