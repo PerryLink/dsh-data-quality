@@ -113,7 +113,22 @@ Son los puntos de entrada reales; instala y llama a uno.
 
 #### Ejemplo detallado
 
-- `data_profile`
+**Comando**
+
+~~~sh
+data_profile({ path: "dirty-fund-holdings.csv" })
+~~~
+
+**Salida**
+
+~~~text
+Profile of dirty-fund-holdings.csv: 10 rows x 6 columns
+Duplicate rows: 1 (10.0%); sample row indexes: 8
+- nav: mixed; missing 1 (10.0%); unique 7; note: mixed types among 9 present values: 8 numeric, 1 string
+Scorecard (overall 93.2%, weighted 93.2%):
+~~~
+
+*Observado en `README.md:147-149; test/profile.spec.ts:130-132; test/loader.spec.ts:98-99; src/profile.ts:311-315`*
 
 #### Ejemplos breves
 
