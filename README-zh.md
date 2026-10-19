@@ -40,9 +40,10 @@ dsh plugin --profile web remove dsh-data-quality   # 卸载
 
 DeepSeek Harness 的确定性数据梳理、清洗与核查插件。
 
-![dsh-data-quality 终端演示：dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-hero.png)
+![dsh-data-quality 工作流图：问题 → 封存来源 → 报告。](docs/assets/dsh-data-quality-flow.svg)
 
-![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+*工作流概览：问题 → 封存来源 → 报告。下面的示例使用实际命令面。*
+
 
 *同一次运行，动图版。*
 
@@ -105,6 +106,19 @@ allowBuilds:
 安装后重启 profile 生效（bundle 重启激活）。然后在包含 CSV 的工作区中对 agent 说：
 
 > 先梳理 `holdings.csv`，再按规则清洗：去空白、按 `fund_code` 去重、把 `holding_value` 列的 万/亿 单位归一；最后核查 `fund_code` 唯一且非空。
+
+### 示例
+
+以下为插件真实入口；安装后调用一个即可。
+
+#### 详细示例
+
+- `data_profile`
+
+#### 简短示例
+
+- `data_clean`
+- `data_verify`
 
 ## Configuration
 

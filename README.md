@@ -46,11 +46,11 @@ dsh plugin --profile web remove dsh-data-quality   # uninstall
 
 Deterministic data profiling, cleaning, and verification for DeepSeek Harness.
 
-![Terminal demo of dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-hero.png)
+![Workflow diagram for dsh-data-quality: question → sealed sources → report.](docs/assets/dsh-data-quality-flow.svg)
 
-![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+*Workflow overview: question → sealed sources → report. The examples below use the real command surface.*
 
-*The same run, animated.*
+
 
 ## Comparison
 
@@ -112,6 +112,19 @@ allowBuilds:
 Restart the profile after installing (bundles activate on restart). Then ask the agent, in a workspace containing a CSV:
 
 > Profile `holdings.csv`, then clean it by trimming whitespace, deduplicating on `fund_code`, and normalizing the `holding_value` column's 万/亿 units; finally verify `fund_code` is unique and not null.
+
+### Examples
+
+These are the plugin's real entry points; install once, then call one.
+
+#### Detailed example
+
+- `data_profile`
+
+#### Brief examples
+
+- `data_clean`
+- `data_verify`
 
 ## Configuration
 

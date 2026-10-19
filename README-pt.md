@@ -40,9 +40,10 @@ Este plugin faz parte da [família de plugins DSH](https://github.com/PerryLink)
 
 Perfilamento, limpeza e verificação de dados determinísticos para DeepSeek Harness.
 
-![Demonstração de terminal do dsh-data-quality: dsh-data-quality — data_profile over the repo's own dirty fixture](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-hero.png)
+![Diagrama de fluxo de dsh-data-quality: pergunta → fontes seladas → relatório.](docs/assets/dsh-data-quality-flow.svg)
 
-![Animated terminal demo of dsh-data-quality](https://raw.githubusercontent.com/PerryLink/dsh-data-quality/main/docs/assets/dsh-data-quality-demo.gif)
+*Visão geral do fluxo: pergunta → fontes seladas → relatório. Os exemplos abaixo usam a superfície real de comandos.*
+
 
 *A mesma execução, animada.*
 
@@ -105,6 +106,19 @@ allowBuilds:
 Reinicie o profile após instalar (bundles ativam no reinício). Depois peça ao agente, num workspace com um CSV:
 
 > Perfile `holdings.csv`, depois limpe-o aparando espaços, desduplicando por `fund_code` e normalizando as unidades 万/亿 da coluna `holding_value`; por fim verifique que `fund_code` é único e não nulo.
+
+### Exemplos
+
+São os pontos de entrada reais; instale e chame um.
+
+#### Exemplo detalhado
+
+- `data_profile`
+
+#### Exemplos breves
+
+- `data_clean`
+- `data_verify`
 
 ## Configuration
 
