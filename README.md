@@ -136,6 +136,22 @@ Scorecard (overall 93.2%, weighted 93.2%):
 
 *Observed from `README.md:147-149; test/profile.spec.ts:130-132; test/loader.spec.ts:98-99; src/profile.ts:311-315`*
 
+#### Failure branch
+
+**Input**
+
+~~~text
+{"path":"dirty-fund-holdings.csv","rules":[{"rule":"dedupe","columns":["nope"]}]}
+~~~
+
+**Output**
+
+~~~text
+isError=true; error.message=rule 0: unknown column "nope" (columns: fund_code, fund_name, nav, nav_date, holding_value, currency)
+~~~
+
+*Observed from `plugins/dsh-data-quality/src/clean.ts:66-68; plugins/dsh-data-quality/fixtures/dirty-fund-holdings.csv; exercised through plugins/dsh-data-quality/test/harness.ts`*
+
 #### Brief examples
 
 - `data_clean`

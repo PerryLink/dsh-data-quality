@@ -130,6 +130,22 @@ Scorecard (overall 93.2%, weighted 93.2%):
 
 *Observado en `README.md:147-149; test/profile.spec.ts:130-132; test/loader.spec.ts:98-99; src/profile.ts:311-315`*
 
+#### Rama de fallo
+
+**Entrada**
+
+~~~text
+{"path":"dirty-fund-holdings.csv","rules":[{"rule":"dedupe","columns":["nope"]}]}
+~~~
+
+**Salida**
+
+~~~text
+isError=true; error.message=rule 0: unknown column "nope" (columns: fund_code, fund_name, nav, nav_date, holding_value, currency)
+~~~
+
+*Observado en `plugins/dsh-data-quality/src/clean.ts:66-68; plugins/dsh-data-quality/fixtures/dirty-fund-holdings.csv; exercised through plugins/dsh-data-quality/test/harness.ts`*
+
 #### Ejemplos breves
 
 - `data_clean`
