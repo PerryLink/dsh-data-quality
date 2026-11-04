@@ -54,6 +54,8 @@ try {
     config: { path: pathToFileURL(configPath).href },
   })
   await ctx.loader.await()
+  // cordis 4.1.0 settles a failed row on its fiber instead of rejecting await().
+  for (const entry of ctx.loader.entries()) await entry.fiber
 
   // Authoritative registries carry the plugin's contributions.
   const names = ctx.tools.schemas().map((schema) => schema.name)
@@ -81,13 +83,15 @@ try {
 
   /** Execute one tool through the real pipeline; fail on isError. */
   const run = async (name, args) => {
-    const result = await ctx.tools.execute({
-      callId: CallId(`smoke-${name}`),
-      name,
-      arguments: args,
+    // 0.2.2: execute() takes a whole batch and settles one result per call.
+    const batch = await ctx.tools.execute({
+      calls: [{ type: 'tool-call', id: CallId(`smoke-${name}`), name, arguments: JSON.stringify(args) }],
       agent,
       signal: new AbortController().signal,
     })
+    const outcome = batch.results[0]
+    if (outcome === undefined) throw new Error(`${name} settled no result`)
+    const result = outcome.result
     if (result.isError) {
       throw new Error(`${name} failed: ${result.error?.message ?? 'unknown error'}`)
     }

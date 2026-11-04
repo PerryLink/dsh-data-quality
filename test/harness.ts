@@ -18,6 +18,7 @@ import { apply as jsonApply, Config as jsonConfig } from '@deepseek-ai/dsh-stora
 import { apply as domainApply, Config as domainConfig } from '@deepseek-ai/dsh-storage-domain'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import { CallId } from './call-id.ts'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { ToolExecutionResult } from '@deepseek-ai/dsh-tools'
@@ -52,6 +53,8 @@ export async function mountBase(sessionId: string): Promise<BaseHarness> {
   // ToolRuntime injects systemPrompt; mount it first (real service, like dsh-fast's harness).
   await ctx.plugin(SystemPrompt, { personaPrefix: '' })
   await ctx.plugin(ToolRuntime)
+  // 0.2.2: raw batch execution lives behind a pluggable executor.
+  await ctx.plugin(NativeToolExecutor)
   const workspace = await mkdtemp(path.join(tmpdir(), 'dq-work-'))
   const session = ctx.sessions.create(SessionId(sessionId), { meta: { cwd: workspace } })
   const agent = {
@@ -84,13 +87,15 @@ let callCounter = 0
  */
 export async function runTool(base: BaseHarness, name: string, args: Record<string, unknown>): Promise<ToolExecutionResult> {
   callCounter += 1
-  return base.ctx.tools.execute({
-    callId: CallId(`test-${name}-${callCounter}`),
-    name,
-    arguments: args,
+  // 0.2.2: execute() takes a whole batch and settles one result per call.
+  const batch = await base.ctx.tools.execute({
+    calls: [{ type: 'tool-call', id: CallId(`test-${name}-${callCounter}`), name, arguments: JSON.stringify(args) }],
     agent: base.agent,
     signal: new AbortController().signal,
   })
+  const outcome = batch.results[0]
+  if (outcome === undefined) throw new Error(`tool executor settled no result for ${name}`)
+  return outcome.result
 }
 
 /** The dirty CSV fixture shared by engine and plugin tests. */
