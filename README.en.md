@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-dark.svg">
-  <img src="docs/assets/dsh-data-quality-flow-light.svg" width="100%" alt="dsh-data-quality pipeline: holdings.csv → data_profile → data_clean → data_verify → reportKey in the data_quality domain; the service plane exposes ctx.dataQuality and verifyCitations">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-hero-en-dark.webp">
+  <img src="docs/assets/dsh-data-quality-hero-en-light.webp" width="100%" alt="dsh-data-quality six-axis DAMA radar: completeness 96.7%, uniqueness 90.0%, validity 91.4%, consistency 87.9%, timeliness 100.0%, and accuracy undetermined without a declared schema (dashed axis, no value); the bottom strip shows the deterministic reportKey format with a 17-digit UTC stamp, the kind, and an 8-hex fingerprint">
 </picture>
 
 # dsh-data-quality
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-data-quality
 ## What it is
 
 Give the model a CSV and `dsh-data-quality` reads it into a structured dataset, then computes everything you should know with pure functions: rows and columns, which columns are mixed-type, what is missing, what is duplicated, what the numeric distributions and IQR outliers look like — and finally a six-dimension DAMA scorecard. Cleaning and verification are expressed as declarative rules; every run persists its report to the `data_quality` storage domain and returns a `reportKey`, so every number the model shows you can be re-opened rather than "felt". All computation is TypeScript inside the harness process: no network, no credentials, no external processes, no model calls.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-data-quality-flow-v5-light.svg" width="100%" alt="dsh-data-quality structure: one read-only dataset (.csv/.tsv/.json/.jsonl under maxRows 200000 and maxFileSizeMB 64) fans out to the profile, clean, and verify deterministic instruments; clean also writes the clean-diff before/after profile and hands its output table to verify; all runs fan into the data_quality report ledger keyed by the deterministic reportKey, and the read-back wire checks citations against the snapshot as verified / mismatch / not-found / unverifiable">
+</picture>
 
 ## Three-step setup
 
@@ -367,7 +372,7 @@ pnpm pack
 - Tests run vitest against the REAL `Context`/`Session`/`ToolRuntime`/storage domain (no hand-written service mocks) plus pure engine specs; every clean/verify rule has positive and negative cases, and `verifyCitations` covers all four statuses.
 - `scripts/loader-runner.mjs` boots the real Loader composition and executes the profile → clean → verify chain against `fixtures/` without an API key.
 - Release: `node scripts/release.mjs <x.y.z>` (never pushes; the tag triggers `release.yml`).
-- The README images are generated programmatically by [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow): a hand-written two-skin SVG pipeline for the hero plus light/dark webp for the measured chart, safe to re-run.
+- The README images are generated programmatically by [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow): light/dark webp heroes (the six-axis DAMA radar), a hand-written two-skin SVG structure diagram, and light/dark webp for the measured chart; safe to re-run.
 
 Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification`
 

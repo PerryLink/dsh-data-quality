@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-dark.svg">
-  <img src="docs/assets/dsh-data-quality-flow-light.svg" width="100%" alt="dsh-data-quality 管线：holdings.csv → data_profile → data_clean → data_verify → data_quality 域里的 reportKey；服务面提供 ctx.dataQuality 与 verifyCitations">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-hero-zh-dark.webp">
+  <img src="docs/assets/dsh-data-quality-hero-zh-light.webp" width="100%" alt="dsh-data-quality 六维 DAMA 雷达：completeness 96.7%、uniqueness 90.0%、validity 91.4%、consistency 87.9%、timeliness 100.0%，accuracy 在未声明 schema 时为未判定（虚线轴，不填值）；底部为确定性 reportKey 格式 17 位 UTC 时间戳-profile-8 位指纹">
 </picture>
 
 # dsh-data-quality
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-data-quality
 ## 它是什么
 
 给模型一份 CSV，`dsh-data-quality` 先把它读成结构化数据集，再用纯函数算出你应该知道的一切：多少行多少列、哪些列是混合类型、缺了多少、重复了多少、数值分布和离群点长什么样，最后给出一张 DAMA 六维计分卡。清洗和核查都用声明式规则表达，跑完把报告写进 `data_quality` 存储域并返回一个 `reportKey`——模型看到的每个数字都能凭这个键回查，而不是由模型自己"感觉"出来。所有计算都是 harness 进程内的 TypeScript：无网络、无凭据、无外部进程、无模型调用。
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-data-quality-flow-v5-light.svg" width="100%" alt="dsh-data-quality 结构：一份只读数据集（.csv/.tsv/.json/.jsonl，maxRows 200000、maxFileSizeMB 64）扇出到 profile / clean / verify 三台确定性引擎；clean 另写 clean-diff 前后画像，清洗后的表又是 verify 的输入；三路运行汇入 data_quality 域的报告账本，键为确定性 reportKey；底部回查环用 verifyCitations 把引用数字对回快照，状态为 verified / mismatch / not-found / unverifiable">
+</picture>
 
 ## 三步上手
 
@@ -361,7 +366,7 @@ pnpm pack
 - 测试用 vitest 跑真实 `Context`/`Session`/`ToolRuntime`/storage domain（不手写服务 mock）加纯引擎用例；每类清洗/核查规则都有正反用例，`verifyCitations` 覆盖四种状态。
 - `scripts/loader-runner.mjs` 以真实 Loader 组合启动，并在无 API key 下对 `fixtures/` 执行 梳理 → 清洗 → 核查 链路。
 - 发布：`node scripts/release.mjs <x.y.z>`（绝不 push；tag 触发 `release.yml`）。
-- 配图由 [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) 程序化生成（Python + Pillow）：hero 为手写双版 SVG 流程图，实测图为深浅两版 webp，可重复执行。
+- 配图由 [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) 程序化生成（Python + Pillow）：hero 为深浅双版 webp（六维 DAMA 雷达），结构图为手写双版 SVG，实测图为深浅双版 webp，可重复执行。
 
 Topics：`dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification`
 

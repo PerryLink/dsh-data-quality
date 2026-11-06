@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="660" viewBox="0 0 1100 660" role="img" aria-labelledby="flowTitle flowDesc">
+<title id="flowTitle">dsh-data-quality: one read-only dataset, three deterministic instruments, one keyed report ledger</title>
+<desc id="flowDesc">A workspace-confined dataset file is read-only and re-loaded per run under maxRows / maxFileSizeMB / allowedExtensions guards; the same input fans out to the profile, clean, and verify instruments (clean additionally writes the clean-diff profile delta and hands its output table to verify); all runs fan into one data_quality report ledger keyed by the deterministic reportKey, and a read-back wire returns from the ledger to the dataset for verifyCitations statuses.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#f9f6fd"/>
+    <stop offset="1" stop-color="#e4eaf8"/>
+  </linearGradient>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="180%">
+    <feDropShadow dx="0" dy="8" stdDeviation="11" flood-color="#1b1735" flood-opacity="0.10"/>
+  </filter>
+  <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+    <circle cx="1.4" cy="1.4" r="1.4" fill="#d9d3ea"/>
+  </pattern>
+</defs>
+<rect width="1100" height="660" fill="url(#bg)"/>
+<rect width="1100" height="660" fill="url(#dots)" opacity=".4"/>
+<text x="44" y="56" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" font-weight="700" text-anchor="start">dsh-data-quality</text>
+<text x="44" y="82" fill="#4d5261" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="14.5" font-weight="400" text-anchor="start">one read-only dataset · three instruments · one keyed ledger</text>
+<rect x="766" y="40" width="290" height="34" rx="17" fill="#ece7f9"/>
+<text x="911" y="62" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="400" text-anchor="middle">pure TypeScript · no network</text>
+<line x1="44" y1="100" x2="1056" y2="100" stroke="#e7e4f0" stroke-width="1.5"/>
+<g filter="url(#soft)">
+<rect x="40" y="118" width="242" height="402" rx="18" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.5"/>
+</g>
+<text x="58" y="144" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="700" text-anchor="start">SNAPSHOT</text>
+<text x="264" y="144" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="end">read-only</text>
+<text x="58" y="174" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" font-weight="700" text-anchor="start">holdings.csv</text>
+<text x="58" y="196" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">.csv  .tsv  .json  .jsonl</text>
+<text x="58" y="216" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">immutable · read per run</text>
+<line x1="58" y1="230" x2="264" y2="230" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="58" y="252" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="start">load guards</text>
+<text x="58" y="276" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">maxRows</text>
+<text x="264" y="276" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="end">200000</text>
+<text x="58" y="296" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">maxFileSizeMB</text>
+<text x="264" y="296" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="end">64</text>
+<text x="58" y="316" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">encoding</text>
+<text x="264" y="316" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="end">UTF-8 BOM check</text>
+<text x="58" y="336" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="start">sample</text>
+<text x="264" y="336" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="end">deterministic stride</text>
+<line x1="58" y1="352" x2="264" y2="352" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="58" y="374" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="start">workspace-confined</text>
+<text x="58" y="396" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">path.resolve → containment</text>
+<text x="58" y="414" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">service root: workspaceRoot</text>
+<line x1="58" y1="430" x2="264" y2="430" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="58" y="454" fill="#16a34a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" text-anchor="start">read once · never mutated</text>
+<text x="58" y="476" fill="#4d5261" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="12.5" font-weight="400" text-anchor="start">source file untouched</text>
+<text x="58" y="496" fill="#8f94a4" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="400" text-anchor="start">no network · no model calls</text>
+<g filter="url(#soft)">
+<rect x="306" y="118" width="394" height="120" rx="18" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.5"/>
+</g>
+<text x="324" y="142" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="700" text-anchor="start">PROFILE</text>
+<text x="682" y="142" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="end">data_profile</text>
+<text x="324" y="166" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">rows × cols · types · missing · unique</text>
+<text x="324" y="186" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">numeric dist · IQR outliers · sha256 dupes</text>
+<text x="324" y="206" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">DAMA scorecard 6 dims · weights</text>
+<text x="324" y="226" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">industryPreset → accuracy determinable</text>
+<g filter="url(#soft)">
+<rect x="306" y="262" width="394" height="126" rx="18" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.5"/>
+</g>
+<text x="324" y="286" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="700" text-anchor="start">CLEAN</text>
+<text x="682" y="286" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="end">data_clean</text>
+<text x="324" y="310" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">dedupe · fill-missing · coerce-type</text>
+<text x="324" y="330" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">normalize-unit · trim · map-values</text>
+<text x="324" y="350" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">ordered: each rule sees previous output</text>
+<rect x="324" y="362" width="147.6" height="19" rx="9.5" fill="#ece7f9"/>
+<text x="333" y="375.82" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">contract + preview</text>
+<rect x="474" y="362" width="176.4" height="19" rx="9.5" fill="#fdf0e7"/>
+<text x="483" y="375.82" fill="#c2410c" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">never overwrite source</text>
+<g filter="url(#soft)">
+<rect x="306" y="412" width="394" height="108" rx="18" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.5"/>
+</g>
+<text x="324" y="436" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="700" text-anchor="start">VERIFY</text>
+<text x="682" y="436" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="end">data_verify</text>
+<text x="324" y="460" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">not-null · unique · range · regex · enum</text>
+<text x="324" y="480" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">cross-column · freshness · expectations</text>
+<text x="324" y="500" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">passed:false is a verdict · evidence ≤ 20</text>
+<path d="M286 178 L304 178 M297 173.5 L304 178 L297 182.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 325 L304 325 M297 320.5 L304 325 L297 329.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M286 466 L304 466 M297 461.5 L304 466 L297 470.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M702 178 L722 178 M715 173.5 L722 178 L715 182.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M702 325 L722 325 M715 320.5 L722 325 L715 329.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M702 466 L722 466 M715 461.5 L722 466 L715 470.5" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M676 258 L676 242 M669 237.5 L676 242 L669 246.5" fill="none" stroke="#4B67B4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<text x="666" y="256" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">clean-diff · before/after profile</text>
+<path d="M676 392 L676 408 M669 403.5 L676 408 L669 412.5" fill="none" stroke="#4B67B4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<text x="666" y="407" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">output table → verify input</text>
+<g filter="url(#soft)">
+<rect x="724" y="118" width="336" height="402" rx="18" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.5"/>
+</g>
+<text x="742" y="144" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="700" text-anchor="start">REPORT LEDGER</text>
+<text x="1042" y="144" fill="#8f94a4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" text-anchor="end">data_quality</text>
+<text x="742" y="166" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">domain: data_quality · table: reports</text>
+<line x1="742" y1="178" x2="1042" y2="178" stroke="#e7e4f0" stroke-width="1.3"/>
+<circle cx="748" cy="198" r="3.2" fill="#4B67B4"/>
+<text x="758" y="202" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">-profile</text>
+<text x="1042" y="202" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">types · missing · dupes</text>
+<circle cx="748" cy="224" r="3.2" fill="#4B67B4"/>
+<text x="758" y="228" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">-clean</text>
+<text x="1042" y="228" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">rules[] · contract</text>
+<circle cx="748" cy="250" r="3.2" fill="#4B67B4"/>
+<text x="758" y="254" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">-clean-diff</text>
+<text x="1042" y="254" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">before / after</text>
+<circle cx="748" cy="276" r="3.2" fill="#4B67B4"/>
+<text x="758" y="280" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">-verify</text>
+<text x="1042" y="280" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">rules[] · expectations</text>
+<circle cx="748" cy="302" r="3.2" fill="#4B67B4"/>
+<text x="758" y="306" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">-citations</text>
+<text x="1042" y="306" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="end">verified · mismatch</text>
+<line x1="742" y1="326" x2="1042" y2="326" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="742" y="348" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" text-anchor="start">key = &lt;17-digit UTC stamp&gt;</text>
+<text x="742" y="368" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">    + &lt;kind&gt; + &lt;8-hex path fp&gt;</text>
+<text x="742" y="388" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" text-anchor="start">isValidReportKey · path-safe check</text>
+<line x1="742" y1="406" x2="1042" y2="406" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="742" y="428" fill="#141419" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="700" text-anchor="start">data_report(key | kind)</text>
+<text x="742" y="448" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">→ report · format: html</text>
+<text x="742" y="468" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">invalid / missing key → loud error</text>
+<line x1="742" y1="486" x2="1042" y2="486" stroke="#e7e4f0" stroke-width="1.3"/>
+<text x="742" y="506" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" text-anchor="start">durable across restart · JSON backend</text>
+<path d="M892 520 L892 544 L790 544" fill="none" stroke="#4B67B4" stroke-width="2"/>
+<path d="M330 544 L160 544 L160 524" fill="none" stroke="#4B67B4" stroke-width="2"/>
+<path d="M155 530 L160 522 L165 530" fill="none" stroke="#4B67B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="330" y="524" width="460" height="42" rx="14" fill="#ffffff" stroke="#e4e1ee" stroke-width="1.4"/>
+<text x="348" y="543" fill="#4B67B4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="700" text-anchor="start">READ-BACK · verifyCitations: citation vs snapshot</text>
+<text x="348" y="559" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="400" text-anchor="start">verified · mismatch · not-found · unverifiable</text>
+<text x="44" y="588" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">load: workspace-confined · .csv/.tsv/.json/.jsonl · maxRows 200000 · maxFileSizeMB 64</text>
+<text x="44" y="610" fill="#4d5261" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" text-anchor="start">engines: profileTable · applyCleanRules · verifyTable — pure: no I/O, no clock, no RNG</text>
+<text x="44" y="632" fill="#4d5261" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="13" font-weight="400" text-anchor="start">persist: data_quality reports (storeReports) + adaptive data-quality/profile · clean · verify events</text>
+</svg>

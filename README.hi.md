@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-dark.svg">
-  <img src="docs/assets/dsh-data-quality-flow-light.svg" width="100%" alt="dsh-data-quality पाइपलाइन: holdings.csv → data_profile → data_clean → data_verify → data_quality डोमेन में reportKey; सेवा सतह ctx.dataQuality और verifyCitations देती है">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-hero-en-dark.webp">
+  <img src="docs/assets/dsh-data-quality-hero-en-light.webp" width="100%" alt="dsh-data-quality का छह-अक्षीय DAMA रडार: completeness 96.7%, uniqueness 90.0%, validity 91.4%, consistency 87.9%, timeliness 100.0%, और schema घोषित न होने पर accuracy अनिर्धारित (बिंदु-रेखा अक्ष, कोई मान नहीं); नीचे नियतात्मक reportKey का प्रारूप">
 </picture>
 
 # dsh-data-quality
@@ -37,6 +37,11 @@ dsh plugin --profile <name> add dsh-data-quality
 ## यह क्या है
 
 मॉडल को एक CSV दें — `dsh-data-quality` उसे संरचित डेटासेट के रूप में पढ़ता है और शुद्ध फ़ंक्शनों से वह सब निकालता है जो आपको जानना चाहिए: कितनी पंक्तियाँ-स्तंभ, कौन-से स्तंभ मिश्रित प्रकार के हैं, कितना अनुपस्थित है, कितना डुप्लिकेट है, संख्यात्मक वितरण और IQR आउटलायर कैसे हैं — और अंत में छह-आयामी DAMA स्कोरकार्ड। क्लीनिंग और सत्यापन घोषणात्मक नियमों के रूप में लिखे जाते हैं; हर रन रिपोर्ट को `data_quality` स्टोरेज डोमेन में सहेजता है और एक `reportKey` लौटाता है, इसलिए मॉडल जो भी संख्या दिखाए वह "अनुमान" नहीं बल्कि दोबारा खोली जा सकने वाली रिपोर्ट है। सारी गणना harness प्रक्रिया के भीतर TypeScript है: कोई नेटवर्क नहीं, कोई क्रेडेंशियल नहीं, कोई बाहरी प्रक्रिया नहीं, कोई मॉडल कॉल नहीं।
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/dsh-data-quality-flow-v5-dark.svg">
+  <img src="docs/assets/dsh-data-quality-flow-v5-light.svg" width="100%" alt="dsh-data-quality संरचना: एक रीड-ओनली डेटासेट (.csv/.tsv/.json/.jsonl, maxRows 200000 और maxFileSizeMB 64) profile, clean और verify तीन नियतात्मक इंस्ट्रूमेंट में फैलता है; clean अलग से clean-diff पहले/बाद प्रोफ़ाइल लिखता है और अपनी आउटपुट तालिका verify को देता है; सभी रन data_quality डोमेन के रिपोर्ट लेजर में जुड़ते हैं जिसकी कुंजी नियतात्मक reportKey है, और रीड-बैक तार उद्धरणों को डेटासेट से मिलाता है: verified / mismatch / not-found / unverifiable">
+</picture>
 
 ## तीन चरणों में शुरुआत
 
@@ -361,7 +366,7 @@ pnpm pack
 - टेस्ट vitest को वास्तविक `Context`/`Session`/`ToolRuntime`/स्टोरेज डोमेन पर चलाते हैं (हाथ से लिखे सेवा mock नहीं) और साथ में शुद्ध इंजन spec; हर क्लीन/सत्यापन नियम के सकारात्मक और नकारात्मक मामले हैं, और `verifyCitations` चारों स्थितियाँ कवर करता है।
 - `scripts/loader-runner.mjs` वास्तविक Loader संयोजन शुरू करता है और बिना API कुंजी `fixtures/` पर प्रोफ़ाइल → क्लीन → सत्यापन श्रृंखला चलाता है।
 - रिलीज़: `node scripts/release.mjs <x.y.z>` (कभी push नहीं; tag `release.yml` को ट्रिगर करता है)।
-- README की छवियाँ [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow) से प्रोग्रामेटिक रूप से बनती हैं: hero के लिए हाथ से लिखा दो-स्किन SVG पाइपलाइन और मापे गए चार्ट के लिए हल्का/गहरा webp; दोबारा चलाया जा सकता है।
+- README की छवियाँ [`scripts/gen-readme-assets.py`](scripts/gen-readme-assets.py) (Python + Pillow) से प्रोग्रामेटिक रूप से बनती हैं: हल्का/गहरा webp hero (छह-अक्षीय DAMA रडार), हाथ से लिखा दो-स्किन SVG संरचना चित्र और मापे गए चार्ट के लिए हल्का/गहरा webp; दोबारा चलाया जा सकता है।
 
 Topics: `dsh`, `dsh-plugin`, `deepseek-harness`, `cordis`, `data-quality`, `data-cleaning`, `data-profiling`, `data-verification`
 
