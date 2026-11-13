@@ -77,14 +77,6 @@ export const DATA_QUALITY_EVENT_TYPES = ['data-quality/profile', 'data-quality/c
 export type DataQualityEventType = (typeof DATA_QUALITY_EVENT_TYPES)[number]
 
 /**
- * Loose append shape probed at runtime (rc.6/rc.8/0.1.2-alpha.1 take no
- * options; pre-0.1.2 master builds took `ignorable`; the 0.1.6-alpha.2 third
- * parameter is a `SurfaceIntent` and exists only for surface-eligible types,
- * so a `data-quality/*` call there has no third argument).
- */
-type AppendProbe = (type: string, data: unknown, options?: { ignorable: true }) => unknown
-
-/**
  * Append one `data-quality/*` event when the host can carry it safely; skip
  * silently otherwise (the storage-domain report is always the durable copy).
  * The `ignorable` probe reads the UNBOUND method's source (a `.bind()` result
@@ -101,8 +93,13 @@ export function appendDataQualityEvent(session: Session, type: DataQualityEventT
     session.append(type, data)
     return
   }
-  const append = session.append as AppendProbe
-  if (Function.prototype.toString.call(append).includes('ignorable')) {
-    append.call(session, type, data, { ignorable: true })
+  // rc.3 overloaded `append` with a batch form (see `Session.append` in
+  // `dsh-session`), so the legacy single-event probe has no type-compatible
+  // signature left to assert against. Reflection is the runtime-only path:
+  // widen the method to `unknown`, narrow it back with `typeof`, and invoke
+  // it with the legacy argument list exactly as the pre-rc.3 call did.
+  const append: unknown = session.append
+  if (typeof append === 'function' && Function.prototype.toString.call(append).includes('ignorable')) {
+    Reflect.apply(append, session, [type, data, { ignorable: true }])
   }
 }
