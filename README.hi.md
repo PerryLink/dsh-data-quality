@@ -335,7 +335,7 @@ isError=true; error.message=rule 0: unknown column "nope" (columns: fund_code, f
 
 | सतह | स्थिति |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (2026-10-04 को अनुकूलित): peer रेंज अब alpha.2 लाइन को स्वीकार करती है; वहाँ `Session.append` का तीसरा पैरामीटर केवल सरफ़ेस-योग्य प्रकारों के लिए होता है और वह `SurfaceIntent` है, इसलिए ऑडिट गेट अब भी छोड़ता है और storage-domain रिपोर्ट ही टिकाऊ प्रति रहती है। 2026-09-24 को सत्यापित (तीन typecheck रूलर + पूरी टेस्ट सूट हरी)। |
+| Harness | DeepSeek Harness `dsh-v0.2.2-rc.4` (2026-11-18 को अनुकूलित): peer रेंज अब alpha.2 लाइन को स्वीकार करती है; वहाँ `Session.append` का तीसरा पैरामीटर केवल सरफ़ेस-योग्य प्रकारों के लिए होता है और वह `SurfaceIntent` है, इसलिए ऑडिट गेट अब भी छोड़ता है और storage-domain रिपोर्ट ही टिकाऊ प्रति रहती है। 2026-11-18 को सत्यापित (तीन typecheck रूलर + पूरी टेस्ट सूट हरी)। |
 | Node | `^22.19.0 \|\| >=24.9.0` |
 | पैकेज मैनेजर | `pnpm@11.7.0` |
 | प्लेटफ़ॉर्म | Windows / macOS / Linux (केवल होस्ट प्लगिन) |

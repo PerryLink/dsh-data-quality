@@ -335,7 +335,7 @@ Evidência estática: o emblema histórico de verificação do `dsh-plugin-docto
 
 | Superfície | Estado |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (adaptado em 2026-10-04): o intervalo de peers admite a linha alpha.2; aí o terceiro parâmetro de `Session.append` existe apenas para tipos de superfície e é um `SurfaceIntent`, por isso a porta de auditoria continua a omitir e o relatório do domínio de armazenamento continua a ser a cópia durável. Verificado em 2026-09-24 (três réguas de typecheck + suite completa verde). |
+| Harness | DeepSeek Harness `dsh-v0.2.2-rc.4` (adaptado em 2026-11-18): o intervalo de peers admite a linha alpha.2; aí o terceiro parâmetro de `Session.append` existe apenas para tipos de superfície e é um `SurfaceIntent`, por isso a porta de auditoria continua a omitir e o relatório do domínio de armazenamento continua a ser a cópia durável. Verificado em 2026-11-18 (três réguas de typecheck + suite completa verde). |
 | Node | `^22.19.0 \|\| >=24.9.0` |
 | Gestor de pacotes | `pnpm@11.7.0` |
 | Plataforma | Windows / macOS / Linux (plugin só de host) |

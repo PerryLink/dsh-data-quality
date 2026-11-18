@@ -341,7 +341,7 @@ Static evidence: this repository's historical `dsh-plugin-doctor` verification b
 
 | Surface | Status |
 |---|---|
-| Harness | DeepSeek Harness `dsh-v0.2.1-alpha.1` (adapted 2026-10-04): the peer range now admits the alpha.2 line; there `Session.append`'s third parameter exists only for surface-eligible types and is a `SurfaceIntent`, so the audit gate still skips and the storage-domain report stays the durable copy. Verified 2026-09-24 (three typecheck rulers + full test suite green). |
+| Harness | DeepSeek Harness `dsh-v0.2.2-rc.4` (adapted 2026-11-18): the peer range now admits the alpha.2 line; there `Session.append`'s third parameter exists only for surface-eligible types and is a `SurfaceIntent`, so the audit gate still skips and the storage-domain report stays the durable copy. Verified 2026-11-18 (three typecheck rulers + full test suite green). |
 | Node | `^22.19.0 \|\| >=24.9.0` |
 | Package manager | `pnpm@11.7.0` |
 | Platform | Windows / macOS / Linux (host-only plugin) |
