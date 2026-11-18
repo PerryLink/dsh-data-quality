@@ -9,7 +9,7 @@
 
 **Pare de fazer o modelo calcular: entregue um CSV e receba um perfil, um dataset limpo e um relatório que você pode reabrir.**
 
-Um plugin determinista de qualidade de dados para o DeepSeek Harness: contagens de linhas e colunas, taxas de ausentes, linhas duplicadas, tipos inferidos, um scorecard DAMA de seis dimensões e sete tipos de regras de verificação — tudo calculado em TypeScript puro dentro do processo do harness, com relatórios persistidos no domínio de armazenamento `data_quality`.
+Um plugin determinista de qualidade de dados para o DeepSeek Harness: contagens de linhas e colunas, taxas de ausentes, linhas duplicadas, tipos inferidos, um scorecard DAMA de seis dimensões e sete tipos de regras de verificação — tudo calculado em TypeScript puro dentro do processo do harness, com relatórios persistidos no domínio de armazenamento `dsh-v0.2.2-rc.4`（2026-11-18）；`data_quality`.
 
 [Instalar](#instalação-em-três-passos) · [Configuração](#configuração) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 
@@ -317,7 +317,7 @@ Não — o modelo não faz aritmética aqui. Contagens de linhas, taxas de ausen
 
 ## Interoperabilidade com outros plugins DSH
 
-Verificado contra o corredor de host que este repositório declara (`>=0.2.1-0 <0.3.0`) e o contrato de plugins do `dsh-plugin-guide`.
+Verificado contra o corredor de host que este repositório declara (`>=0.2.1-0 <0.3.0 || >=0.2.2-0 <0.3.0`) e o contrato de plugins do `dsh-plugin-guide`.
 
 Este plugin **não interfere** com outros plugins:
 

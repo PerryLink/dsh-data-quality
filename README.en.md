@@ -9,7 +9,7 @@
 
 **Stop making the model do the math — hand it a CSV and get back a profile, a clean dataset, and a report you can re-open.**
 
-A deterministic data-quality plugin for DeepSeek Harness: row and column counts, missing rates, duplicate rows, inferred types, a six-dimension DAMA scorecard, and seven verification rule kinds — all computed in pure TypeScript inside the harness process, with reports persisted to the `data_quality` storage domain.
+A deterministic data-quality plugin for DeepSeek Harness: row and column counts, missing rates, duplicate rows, inferred types, a six-dimension DAMA scorecard, and seven verification rule kinds — all computed in pure TypeScript inside the harness process, with reports persisted to the `dsh-v0.2.2-rc.4`（2026-11-18）；`data_quality` storage domain.
 
 [Install](#three-step-setup) · [Configuration](#configuration) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 
@@ -323,7 +323,7 @@ No — the model does not do arithmetic here. Row counts, missing rates, quantil
 
 ## Interoperability with other DSH plugins
 
-Verified against the host corridor this repository declares (`>=0.2.1-0 <0.3.0`) and the plugin contract in `dsh-plugin-guide`.
+Verified against the host corridor this repository declares (`>=0.2.1-0 <0.3.0 || >=0.2.2-0 <0.3.0`) and the plugin contract in `dsh-plugin-guide`.
 
 This plugin **does not interfere** with other plugins:
 
