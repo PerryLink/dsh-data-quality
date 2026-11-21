@@ -36,6 +36,10 @@ dsh plugin --profile <name> add dsh-data-quality
 
 ## 它是什么
 
+![dsh-data-quality 真实终端运行](docs/assets/dsh-data-quality-demo.gif)
+
+*本仓库一次真实运行的动图回放。*
+
 给模型一份 CSV，`dsh-data-quality` 先把它读成结构化数据集，再用纯函数算出你应该知道的一切：多少行多少列、哪些列是混合类型、缺了多少、重复了多少、数值分布和离群点长什么样，最后给出一张 DAMA 六维计分卡。清洗和核查都用声明式规则表达，跑完把报告写进 `data_quality` 存储域并返回一个 `reportKey`——模型看到的每个数字都能凭这个键回查，而不是由模型自己"感觉"出来。所有计算都是 harness 进程内的 TypeScript：无网络、无凭据、无外部进程、无模型调用。
 
 <picture>

@@ -43,6 +43,11 @@ dsh plugin --profile <name> add dsh-data-quality
   <img src="docs/assets/dsh-data-quality-flow-v5-light.svg" width="100%" alt="dsh-data-quality संरचना: एक रीड-ओनली डेटासेट (.csv/.tsv/.json/.jsonl, maxRows 200000 और maxFileSizeMB 64) profile, clean और verify तीन नियतात्मक इंस्ट्रूमेंट में फैलता है; clean अलग से clean-diff पहले/बाद प्रोफ़ाइल लिखता है और अपनी आउटपुट तालिका verify को देता है; सभी रन data_quality डोमेन के रिपोर्ट लेजर में जुड़ते हैं जिसकी कुंजी नियतात्मक reportKey है, और रीड-बैक तार उद्धरणों को डेटासेट से मिलाता है: verified / mismatch / not-found / unverifiable">
 </picture>
 
+![dsh-data-quality का असली टर्मिनल रन](docs/assets/dsh-data-quality-demo.gif)
+
+*इस रिपॉज़िटरी में दर्ज असली रन का एनिमेटेड रीप्ले।*
+
+
 ## तीन चरणों में शुरुआत
 
 1. **इंस्टॉल** (तीन में से एक चैनल):

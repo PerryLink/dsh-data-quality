@@ -43,6 +43,11 @@ Dale un CSV al modelo y `dsh-data-quality` lo lee como un dataset estructurado y
   <img src="docs/assets/dsh-data-quality-flow-v5-light.svg" width="100%" alt="Estructura de dsh-data-quality: un dataset de solo lectura (.csv/.tsv/.json/.jsonl con maxRows 200000 y maxFileSizeMB 64) se abre en abanico a los instrumentos deterministas profile, clean y verify; clean además escribe el perfil clean-diff antes/después y entrega su tabla de salida a verify; todas las ejecuciones confluyen en el libro de informes del dominio data_quality con el reportKey determinista, y el cable de relectura contrasta las citas con el dataset: verified / mismatch / not-found / unverifiable">
 </picture>
 
+![dsh-data-quality: ejecución real de terminal](docs/assets/dsh-data-quality-demo.gif)
+
+*Repetición animada de una ejecución real registrada en este repositorio.*
+
+
 ## Instalación en tres pasos
 
 1. **Instalar** (elige un canal):
