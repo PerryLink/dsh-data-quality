@@ -9,7 +9,9 @@
 
 **让模型不再心算数据——一份 CSV 进去，拿回可回查的梳理、清洗与核查报告。**
 
-面向 DeepSeek Harness 的确定性数据质量插件：行列数、缺失率、重复行、类型推断、六维计分卡与七类核查规则全部在 harness 进程内用纯 TypeScript 计算，报告落进 `dsh-v0.2.2-rc.4`（2026-11-18）；`data_quality` 存储域。
+面向 DeepSeek Harness 的确定性数据质量插件：行列数、缺失率、重复行、类型推断、六维计分卡与七类核查规则全部在 harness 进程内用纯 TypeScript 计算，报告落进、`data_quality` 存储域。
+
+最近一次核验：DeepSeek Harness `dsh-v0.2.3-alpha.1`（2026-11-22）。
 
 [安装](#三步上手) · [配置](#配置) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 

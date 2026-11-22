@@ -9,7 +9,9 @@
 
 **Deja de hacer que el modelo calcule: dale un CSV y recibe un perfil, un dataset limpio y un informe que puedes reabrir.**
 
-Un plugin determinista de calidad de datos para DeepSeek Harness: recuentos de filas y columnas, tasas de faltantes, filas duplicadas, tipos inferidos, un scorecard DAMA de seis dimensiones y siete tipos de reglas de verificación — todo calculado en TypeScript puro dentro del proceso del harness, con informes persistidos en el dominio de almacenamiento `dsh-v0.2.2-rc.4`（2026-11-18）；`data_quality`.
+Un plugin determinista de calidad de datos para DeepSeek Harness: recuentos de filas y columnas, tasas de faltantes, filas duplicadas, tipos inferidos, un scorecard DAMA de seis dimensiones y siete tipos de reglas de verificación — todo calculado en TypeScript puro dentro del proceso del harness, con informes persistidos en el dominio de almacenamiento, `data_quality`.
+
+Última verificación: DeepSeek Harness `dsh-v0.2.3-alpha.1` (2026-11-22).
 
 [Instalar](#instalación-en-tres-pasos) · [Configuración](#configuración) · [FAQ](#faq) · [简体中文](README.md) · [English](README.en.md) · [Español](README.es.md) · [Português](README.pt.md) · [हिन्दी](README.hi.md)
 
@@ -46,7 +48,6 @@ Dale un CSV al modelo y `dsh-data-quality` lo lee como un dataset estructurado y
 ![dsh-data-quality: ejecución real de terminal](docs/assets/dsh-data-quality-demo.gif)
 
 *Repetición animada de una ejecución real registrada en este repositorio.*
-
 
 ## Instalación en tres pasos
 
