@@ -7,6 +7,8 @@
 
 # dsh-data-quality
 
+当前版本 `0.3.30`。
+
 **让模型不再心算数据——一份 CSV 进去，拿回可回查的梳理、清洗与核查报告。**
 
 面向 DeepSeek Harness 的确定性数据质量插件：行列数、缺失率、重复行、类型推断、六维计分卡与七类核查规则全部在 harness 进程内用纯 TypeScript 计算，报告落进、`data_quality` 存储域。

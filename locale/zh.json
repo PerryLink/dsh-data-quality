@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "数据质量",
+    "description": "面向 DeepSeek Harness 的确定性数据质量插件：行列数、缺失率、重复行、类型推断、六维计分卡与七类核查规则全部在 harness 进程内用纯 TypeScript 计算，报告落进、dataquality 存储域。"
+  }
+}
